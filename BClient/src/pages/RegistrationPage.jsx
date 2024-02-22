@@ -34,6 +34,7 @@ export const RegistrationPage = () => {
     telephone: "",
     username: "",
     password: "",
+    isAdmin: false,
   });
 
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
@@ -182,7 +183,7 @@ export const RegistrationPage = () => {
         <FormControlLabel
           control={
             <Checkbox
-              checked={formData.isAdmin}
+            checked={Boolean(formData.isAdmin)}
               onChange={handleChange}
               name="isAdmin"
             />
