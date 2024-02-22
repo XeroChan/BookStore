@@ -95,6 +95,7 @@ export const RegistrationPage = () => {
             clientId: clientId,
             username: registrationData.username,
             password: registrationData.password,
+            isAdmin: registrationData.isAdmin,
           }),
         }
       );
