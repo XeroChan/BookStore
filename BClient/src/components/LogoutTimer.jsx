@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import Typography from "@mui/material/Typography";
 
-const LogoutTimer = ({ initialTime = 500, onTimeout }) => {
+const LogoutTimer = ({ initialTime = 90, onTimeout }) => {
   const [logoutTimer, setLogoutTimer] = useState(initialTime);
 
   useEffect(() => {
