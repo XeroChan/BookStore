@@ -6,6 +6,8 @@ import {
   TextField,
   Button,
   Snackbar,
+  FormControlLabel,
+  Checkbox,
 } from "@mui/material";
 import { styled } from "@mui/system";
 
@@ -174,6 +176,16 @@ export const RegistrationPage = () => {
           value={formData.password}
           onChange={handleChange}
           required
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={formData.isAdmin}
+              onChange={handleChange}
+              name="isAdmin"
+            />
+          }
+          label="Admin"
         />
         <Button type="submit" variant="contained" color="primary">
           Zarejestruj się
