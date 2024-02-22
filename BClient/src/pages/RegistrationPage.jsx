@@ -42,8 +42,15 @@ export const RegistrationPage = () => {
   const navigate = useNavigate(); // Get the history object
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
+    const { name, value, type, checked } = e.target;
+  
+    // Jeśli pole to checkbox, obsłuż zmianę w sposób odpowiedni dla checkboxa
+    if (type === 'checkbox') {
+      setFormData((prevData) => ({ ...prevData, [name]: checked }));
+    } else {
+      // W innym przypadku, obsłuż zmianę w sposób standardowy
+      setFormData((prevData) => ({ ...prevData, [name]: value }));
+    }
   };
 
   const handleRegistration = async (e) => {
@@ -56,7 +63,7 @@ export const RegistrationPage = () => {
       telephone: formData.telephone,
       username: formData.username,
       password: formData.password,
-      isAdmin: formData.isAdmin ? 1 : 0, // Convert isAdmin to 1 or 0
+      isAdmin: formData.isAdmin,
     };
 
     try {
@@ -183,7 +190,7 @@ export const RegistrationPage = () => {
         <FormControlLabel
           control={
             <Checkbox
-            checked={Boolean(formData.isAdmin)}
+              checked={formData.isAdmin}
               onChange={handleChange}
               name="isAdmin"
             />

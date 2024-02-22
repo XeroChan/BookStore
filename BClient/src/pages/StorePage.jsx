@@ -705,8 +705,8 @@ export const StorePage = () => {
           <TableCell>{client?.email || "N/A"}</TableCell>
           <TableCell>{book?.title || "N/A"}</TableCell>
           <TableCell>{book?.author || "N/A"}</TableCell>
-          <TableCell>{rental.rentalDate || "N/A"}</TableCell>
-          <TableCell>{rental.dueDate || "N/A"}</TableCell>
+          <TableCell>{formatDate(rental.rentalDate) || "N/A"}</TableCell>
+          <TableCell>{formatDate(rental.dueDate) || "N/A"}</TableCell>
         </TableRow>
       );
     });
