@@ -55,6 +55,7 @@ export const RegistrationPage = () => {
       telephone: formData.telephone,
       username: formData.username,
       password: formData.password,
+      isAdmin: formData.isAdmin ? 1 : 0, // Convert isAdmin to 1 or 0
     };
 
     try {
