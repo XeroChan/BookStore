@@ -1,0 +1,10 @@
+{
+    "dataworkspace.excludedProjects": [
+        "BookStore.Api/DbProjects/DatabaseProjectBookStore/DatabaseProjectBookStore.sqlproj",
+        "BookStorePrj/BookStorePrj.sqlproj",
+        "BookStore.Api/DbProjects/DatabaseProjectBookStore/DatabaseProjectBookStore/DatabaseProjectBookStore.sqlproj",
+        "BookStore.Api/DbProjects/DatabaseProjectBookStore/DatabaseProjectBookStore/DatabaseProjectBookStore/DatabaseProjectBookStore.sqlproj",
+        "BookStore.Api/DbPrj/DatabaseProjectBookStore/DatabaseProjectBookStore.sqlproj",
+        "BookStore.Api/DbPrj/DatabaseProjectBookStore2/DatabaseProjectBookStore2.sqlproj"
+    ]
+}
