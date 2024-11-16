@@ -3845,11 +3845,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "E:\\BookStore\\BookStore.Api\\BookStore.Api.csproj",
+      "projectUniqueName": "D:\\BS\\BookStore\\BookStore.Api\\BookStore.Api.csproj",
       "projectName": "BookStore.Api",
-      "projectPath": "E:\\BookStore\\BookStore.Api\\BookStore.Api.csproj",
+      "projectPath": "D:\\BS\\BookStore\\BookStore.Api\\BookStore.Api.csproj",
       "packagesPath": "C:\\Users\\Maciej\\.nuget\\packages\\",
-      "outputPath": "E:\\BookStore\\BookStore.Api\\obj\\",
+      "outputPath": "D:\\BS\\BookStore\\BookStore.Api\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Maciej\\AppData\\Roaming\\NuGet\\NuGet.Config"
