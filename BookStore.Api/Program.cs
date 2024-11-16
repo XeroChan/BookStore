@@ -66,10 +66,14 @@ await app.Services.InitializeDbAsync();
 
 app.UseHttpLogging();
 
+app.MapAuthorEndpoints();
+app.MapBooksEndpoints();
 app.MapClientsEndpoints();
+app.MapCommentEndpoints();
 app.MapCredentialsEndpoints();
 app.MapRentalsEndpoints();
-app.MapBooksEndpoints();
+app.MapSubscriptionEndpoints();
+
 app.MapPost("/login", async (Credential credential, BookStoreContext db) =>
 {
     Console.WriteLine($"Attempting login for username: {credential.Username}");
