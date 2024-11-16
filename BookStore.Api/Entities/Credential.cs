@@ -17,6 +17,8 @@ public class Credential
     public required string Password { get; set; }
     [Column("is_admin")]
     public bool IsAdmin { get; set; }
+    [Column("is_author")]
+    public bool IsAuthor { get; set; }
     // Navigation property
     public Client? Client { get; set; }
 

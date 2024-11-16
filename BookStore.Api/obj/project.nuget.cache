@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "EAtj7tGr4NFRk23hiuCv6m01o5TesycL0T7Wt2SrHZeEsiIM+/CH6jrUSXpoGrd2fqlLtFQJIam0GUu7DcBtqw==",
+  "dgSpecHash": "p7d9m4BN/5U=",
   "success": true,
-  "projectFilePath": "D:\\projects\\Store\\BookStore\\BookStore.Api\\BookStore.Api.csproj",
+  "projectFilePath": "E:\\BookStore\\BookStore.Api\\BookStore.Api.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Maciej\\.nuget\\packages\\asp.versioning.abstractions\\7.0.0\\asp.versioning.abstractions.7.0.0.nupkg.sha512",
     "C:\\Users\\Maciej\\.nuget\\packages\\asp.versioning.http\\7.0.0\\asp.versioning.http.7.0.0.nupkg.sha512",

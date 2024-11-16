@@ -269,3 +269,10 @@ D:\projects\Store\BookStore\BookStore.Api\obj\Debug\net7.0\refint\BookStore.Api.
 D:\projects\Store\BookStore\BookStore.Api\obj\Debug\net7.0\BookStore.Api.pdb
 D:\projects\Store\BookStore\BookStore.Api\obj\Debug\net7.0\BookStore.Api.genruntimeconfig.cache
 D:\projects\Store\BookStore\BookStore.Api\obj\Debug\net7.0\ref\BookStore.Api.dll
+D:\BookStore\BookStore\BookStore.Api\obj\Debug\net7.0\BookStore.Api.csproj.AssemblyReference.cache
+D:\BookStore\BookStore\BookStore.Api\obj\Debug\net7.0\BookStore.Api.GeneratedMSBuildEditorConfig.editorconfig
+D:\BookStore\BookStore\BookStore.Api\obj\Debug\net7.0\BookStore.Api.AssemblyInfoInputs.cache
+D:\BookStore\BookStore\BookStore.Api\obj\Debug\net7.0\BookStore.Api.AssemblyInfo.cs
+D:\BookStore\BookStore\BookStore.Api\obj\Debug\net7.0\BookStore.Api.csproj.CoreCompileInputs.cache
+D:\BookStore\BookStore\BookStore.Api\obj\Debug\net7.0\BookStore.Api.MvcApplicationPartsAssemblyInfo.cs
+D:\BookStore\BookStore\BookStore.Api\obj\Debug\net7.0\BookStore.Api.MvcApplicationPartsAssemblyInfo.cache

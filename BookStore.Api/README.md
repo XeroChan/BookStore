@@ -2,7 +2,7 @@
 
 ## VS Code commands
 
-ctrl+shift+b - build project
+ctrl+shift+b - build project // dotnet build - builds project
 ctrl + . - quick fix
 ctrl + space - check other parameters
 ctrl+j - terminal

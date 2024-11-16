@@ -6,7 +6,7 @@ public record BookDtoV1
 (
     int Id,
     string Title,
-    string Author,
+    int AuthorId,
     string Publisher,
     string Genre,
     string Description,
@@ -21,7 +21,7 @@ public record BookDtoV2
 (
     int Id,
     string Title,
-    string Author,
+    int AuthorId,
     string Publisher,
     string Genre,
     string Description,
@@ -39,8 +39,7 @@ public record CreateBookDto
     [StringLength(100)]
     string Title,
     [Required]
-    [StringLength(30)]
-    string Author,
+    int AuthorId,
     [Required]
     [StringLength(40)]
     string Publisher,
@@ -71,8 +70,7 @@ public record UpdateBookDto
     [StringLength(100)]
     string Title,
     [Required]
-    [StringLength(30)]
-    string Author,
+    int AuthorId,
     [Required]
     [StringLength(40)]
     string Publisher,

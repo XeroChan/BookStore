@@ -12,7 +12,8 @@ public class InMemCredentialRepository : ICredentialRepository
             ClientId = 1,
             Username = "JanKovalsky45",
             Password = "jahnkofalskiy40@!",
-            IsAdmin = false
+            IsAdmin = false,
+            IsAuthor = false
         },
         new Credential()
         {
@@ -20,7 +21,8 @@ public class InMemCredentialRepository : ICredentialRepository
             ClientId = 2,
             Username = "doeJonh245",
             Password = "d03j0hn!!",
-            IsAdmin = false
+            IsAdmin = false,
+            IsAuthor = true
         }
     };
     public async Task<IEnumerable<Credential>> GetAllAsync()

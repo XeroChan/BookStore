@@ -54,7 +54,7 @@ public static class BooksEndpoints //all extension methods are static
             Book book = new()
             {
                 Title = bookDto.Title,
-                Author = bookDto.Author,
+                AuthorId = bookDto.AuthorId,
                 Publisher = bookDto.Publisher,
                 Genre = bookDto.Genre,
                 Description = bookDto.Description,
@@ -79,7 +79,6 @@ public static class BooksEndpoints //all extension methods are static
             if (existingBook is null) return Results.NotFound();
 
             existingBook.Title = updatedBookDto.Title;
-            existingBook.Author = updatedBookDto.Author;
             existingBook.Publisher = updatedBookDto.Publisher;
             existingBook.Genre = updatedBookDto.Genre;
             existingBook.Description = updatedBookDto.Description;

@@ -10,7 +10,7 @@ public static class EntityExtensions
         (
             book.Id,
             book.Title,
-            book.Author,
+            book.AuthorId,
             book.Publisher,
             book.Genre,
             book.Description,
@@ -27,7 +27,7 @@ public static class EntityExtensions
         (
             book.Id,
             book.Title,
-            book.Author,
+            book.AuthorId,
             book.Publisher,
             book.Genre,
             book.Description,

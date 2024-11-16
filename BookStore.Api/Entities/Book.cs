@@ -10,8 +10,8 @@ public class Book
     [StringLength(100)]
     public required string Title { get; set; } // tell compiler that it can be declared in declaration or definition
     [Required]
-    [StringLength(30)]
-    public required string Author { get; set; }
+    [Column("author_id")]
+    public required int AuthorId { get; set; }
     [Required]
     [StringLength(40)]
     public required string Publisher { get; set; }
