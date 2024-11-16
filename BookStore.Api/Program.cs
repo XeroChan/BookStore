@@ -112,9 +112,9 @@ builder.Services.AddApiVersioning(options =>
 builder.Services.AddBookStoreCors(builder.Configuration);
 
 var app = builder.Build(); // define app pipeline - endpoints
-var commentsGroup = app.MapGroup("/comments");
-var authorsGroup = app.MapGroup("/authors");
-var subscriptionsGroup = app.MapGroup("/subscriptions");
+var commentsGroup = app.MapGroup("/comments").WithParameterValidation();
+var authorsGroup = app.MapGroup("/authors").WithParameterValidation();
+var subscriptionsGroup = app.MapGroup("/subscriptions").WithParameterValidation();
 commentsGroup.MapGet("/", () => comments);
 commentsGroup.MapGet("/{id}", (int id) =>
 {
