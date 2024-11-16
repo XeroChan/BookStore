@@ -1,4 +1,5 @@
 using BookStore.Api.Entities;
+using BookStore.Api.Repositories;
 
 namespace BookStore.Api.Endpoints;
 
@@ -6,52 +7,30 @@ public static class SubscriptionEndpoints
 {
     const string GetSubscriptionEndpointName = "GetSubscription";
 
-    static List<Subscription> subscriptions = new()
-    {
-        new Subscription()
-        {
-            Id = 1,
-            AuthorId = 1,
-            CredentialId = 2
-
-        },
-        new Subscription()
-        {
-            Id = 2,
-            AuthorId = 2,
-            CredentialId = 1
-        }
-    };
     public static RouteGroupBuilder MapSubscriptionEndpoints(this IEndpointRouteBuilder routes)
     {
+        InMemSubscriptionRepository subscriptionRepository = new();
         var subscriptionsGroup = routes.MapGroup("/subscriptions").WithParameterValidation();
-
-        subscriptionsGroup.MapGet("/", () => subscriptions);
+        subscriptionsGroup.MapGet("/", () => subscriptionRepository.GetAll());
         subscriptionsGroup.MapGet("/{id}", (int id) =>
         {
-            Subscription? subscription = subscriptions.Find(subscription => subscription.Id == id);
-
-            if (subscription == null)
-            {
-                return Results.NotFound();
-            }
-            return Results.Ok(subscription);
+            Subscription? subscription = subscriptionRepository.Get(id);
+            return subscription is not null ? Results.Ok(subscription) : Results.NotFound();
         })
         .WithName(GetSubscriptionEndpointName);
         subscriptionsGroup.MapPost("", (Subscription subscription) =>
         {
-            subscription.Id = subscriptions.Max(subscription => subscription.Id) + 1;
-            subscriptions.Add(subscription);
+            subscriptionRepository.Create(subscription);
 
             return Results.CreatedAtRoute(GetSubscriptionEndpointName, new { id = subscription.Id }, subscription);
         });
         subscriptionsGroup.MapDelete("/{id}", (int id) =>
         {
-            Subscription? subscription = subscriptions.Find(subscription => subscription.Id == id);
+            Subscription? subscription = subscriptionRepository.Get(id);
 
             if (subscription is not null)
             {
-                subscriptions.Remove(subscription);
+                subscriptionRepository.Delete(id);
             }
 
             return Results.NoContent();

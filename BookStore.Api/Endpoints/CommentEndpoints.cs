@@ -1,54 +1,32 @@
 using BookStore.Api.Entities;
+using BookStore.Api.Repositories;
 
 namespace BookStore.Api.Endpoints;
 
 public static class CommentEndpoints
 {
     const string GetCommentEndpointName = "GetComment";
-    static List<Comment> comments = new()
-    {
-        new Comment()
-        {
-            Id = 1,
-            BookId = 1,
-            CredentialId = 1,
-            CommentString = "Great book!",
-            Rating = 4
-        },
-        new Comment()
-        {
-            Id = 2,
-            BookId = 2,
-            CredentialId = 1,
-            CommentString = "Great too!",
-            Rating = 5
-        }
-    };
+    
     public static RouteGroupBuilder MapCommentEndpoints(this IEndpointRouteBuilder routes)
     {
+        InMemCommentRepository commentRepository = new();
         var commentsGroup = routes.MapGroup("/comments").WithParameterValidation();
-        commentsGroup.MapGet("/", () => comments);
+        commentsGroup.MapGet("/", () => commentRepository.GetAll());
         commentsGroup.MapGet("/{id}", (int id) =>
         {
-            Comment? comment = comments.Find(comment => comment.Id == id);
-
-            if (comment == null)
-            {
-                return Results.NotFound();
-            }
-            return Results.Ok(comment);
+            Comment? comment = commentRepository.Get(id);
+            return comment is not null ? Results.Ok(comment) : Results.NotFound();
         })
         .WithName(GetCommentEndpointName);
         commentsGroup.MapPost("/", (Comment comment) =>
         {
-            comment.Id = comments.Max(comment => comment.Id) + 1;
-            comments.Add(comment);
+            commentRepository.Create(comment);
 
             return Results.CreatedAtRoute(GetCommentEndpointName, new { id = comment.Id }, comment);
         });
         commentsGroup.MapPut("/{id}", (int id, Comment updatedComment) =>
         {
-            Comment? existingComment = comments.Find(comment => comment.Id == id);
+            Comment? existingComment = commentRepository.Get(id);
 
             if (existingComment == null)
             {
@@ -57,15 +35,16 @@ public static class CommentEndpoints
             existingComment.CommentString = updatedComment.CommentString;
             existingComment.Rating = updatedComment.Rating;
 
+            commentRepository.Update(existingComment);
             return Results.NoContent();
         });
         commentsGroup.MapDelete("/{id}", (int id) =>
         {
-            Comment? comment = comments.Find(comment => comment.Id == id);
+            Comment? comment = commentRepository.Get(id);
 
             if (comment is not null)
             {
-                comments.Remove(comment);
+                commentRepository.Delete(id);
             }
 
             return Results.NoContent();
