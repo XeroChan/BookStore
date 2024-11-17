@@ -13,14 +13,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
-
-
 var builder = WebApplication.CreateBuilder(args); // register/define services for app
 builder.Services.AddRepositories(builder.Configuration);
 
 var secretKey = GenerateRandomSecretKey();
 var skey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-
 
 builder.Services.AddAuthentication(options =>
 {

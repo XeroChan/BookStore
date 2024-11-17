@@ -6,5 +6,6 @@
         "BookStore.Api/DbProjects/DatabaseProjectBookStore/DatabaseProjectBookStore/DatabaseProjectBookStore/DatabaseProjectBookStore.sqlproj",
         "BookStore.Api/DbPrj/DatabaseProjectBookStore/DatabaseProjectBookStore.sqlproj",
         "BookStore.Api/DbPrj/DatabaseProjectBookStore2/DatabaseProjectBookStore2.sqlproj"
-    ]
+    ],
+    "dotnet.server.useOmnisharp": true
 }

@@ -36,6 +36,12 @@ dotnet user-secrets set "ConnectionStrings:BookStoreContext" "Server=localhost; 
 dotnet tool install --global dotnet-ef
 dotnet add package Microsoft.EntityFrameworkCore.Design
 
+## Migrations
+dotnet ef migrations add InitialCreate --output-dir Data\Migrations
+
+## Apply migrations
+dotnet ef database update
+
 ## Create token for api
 ```powershell
 dotnet user-jwts create
