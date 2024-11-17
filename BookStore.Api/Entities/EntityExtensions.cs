@@ -72,4 +72,25 @@ public static class EntityExtensions
             rental.DueDate
         );
     }
+    public static AuthorDto AsDto(this Author author) // convert book entity to book Dto
+    {
+        return new AuthorDto
+        (
+            author.Id,
+            author.CredentialId,
+            author.AuthorName,
+            author.AuthorSurname
+        );
+    }
+    public static CommentDto AsDto(this Comment comment) // convert book entity to book Dto
+    {
+        return new CommentDto
+        (
+            comment.Id,
+            comment.BookId,
+            comment.CredentialId,
+            comment.CommentString,
+            comment.Rating
+        );
+    }
 }
