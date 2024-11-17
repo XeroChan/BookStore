@@ -23,27 +23,33 @@ public class InMemCommentRepository : ICommentRepository
             Rating = 5
         }
     };
-    public IEnumerable<Comment> GetAll()
+    public async Task<IEnumerable<Comment>> GetAllAsync()
     {
-        return comments;
+        return await Task.FromResult(comments);
     }
-    public Comment? Get(int id)
+    public async Task<Comment?> GetAsync(int id)
     {
-        return comments.Find(comment => comment.Id == id);
+        return await Task.FromResult(comments.Find(comment => comment.Id == id));
     }
-    public void Create(Comment comment)
+    public async Task CreateAsync(Comment comment)
     {
         comment.Id = comments.Max(comment => comment.Id) + 1;
         comments.Add(comment);
+
+        await Task.CompletedTask;
     }
-    public void Update(Comment updatedComment)
+    public async Task UpdateAsync(Comment updatedComment)
     {
         var index = comments.FindIndex(comment => comment.Id == updatedComment.Id);
         comments[index] = updatedComment;
+
+        await Task.CompletedTask;
     }
-    public void Delete(int id)
+    public async Task DeleteAsync(int id)
     {
         var index = comments.FindIndex(comment => comment.Id == id);
         comments.RemoveAt(index);
+
+        await Task.CompletedTask;
     }
 }

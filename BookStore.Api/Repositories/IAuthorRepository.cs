@@ -4,9 +4,9 @@ namespace BookStore.Api.Repositories;
 
 public interface IAuthorRepository
 {
-    void Create(Author author);
-    void Delete(int id);
-    Author? Get(int id);
-    IEnumerable<Author> GetAll();
-    void Update(Author updatedAuthor);
+    Task CreateAsync(Author author);
+    Task DeleteAsync(int id);
+    Task<Author?> GetAsync(int id);
+    Task<IEnumerable<Author>> GetAllAsync();
+    Task UpdateAsync(Author updatedAuthor);
 }

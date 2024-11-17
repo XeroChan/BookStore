@@ -22,27 +22,33 @@ public class InMemAuthorRepository : IAuthorRepository
             AuthorSurname = "Stary",
         }
     };
-    public IEnumerable<Author> GetAll()
+    public async Task<IEnumerable<Author>> GetAllAsync()
     {
-        return authors;
+        return await Task.FromResult(authors);
     }
-    public Author? Get(int id)
+    public async Task<Author?> GetAsync(int id)
     {
-        return authors.Find(author => author.Id == id);
+        return await Task.FromResult(authors.Find(author => author.Id == id));
     }
-    public void Create(Author author)
+    public async Task CreateAsync(Author author)
     {
         author.Id = authors.Max(author => author.Id) + 1;
         authors.Add(author);
+
+        await Task.CompletedTask;
     }
-    public void Update(Author updatedAuthor)
+    public async Task UpdateAsync(Author updatedAuthor)
     {
         var index = authors.FindIndex(author => author.Id == updatedAuthor.Id);
         authors[index] = updatedAuthor;
+
+        await Task.CompletedTask;
     }
-    public void Delete(int id)
+    public async Task DeleteAsync(int id)
     {
         var index = authors.FindIndex(author => author.Id == id);
         authors.RemoveAt(index);
+
+        await Task.CompletedTask;
     }
 }

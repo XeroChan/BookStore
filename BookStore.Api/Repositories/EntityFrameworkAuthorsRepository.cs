@@ -13,31 +13,31 @@ namespace BookStore.Api.Repositories
             this.dbContext = dbContext;
         }
 
-        public IEnumerable<Author> GetAll()
+        public async Task<IEnumerable<Author>> GetAllAsync()
         {
-            return dbContext.Authors.AsNoTracking().ToList();
+            return await dbContext.Authors.AsNoTracking().ToListAsync();
         }
 
-        public Author? Get(int id)
+        public async Task<Author?> GetAsync(int id)
         {
-            return dbContext.Authors.Find(id);
+            return await dbContext.Authors.FindAsync(id);
         }
 
-        public void Create(Author author)
+        public async Task CreateAsync(Author author)
         {
             dbContext.Authors.Add(author);
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync();
         }
 
-        public void Update(Author updatedAuthor)
+        public async Task UpdateAsync(Author updatedAuthor)
         {
             dbContext.Update(updatedAuthor);
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync();
         }
 
-        public void Delete(int id)
+        public async Task DeleteAsync(int id)
         {
-            dbContext.Authors.Where(author => author.Id == id).ExecuteDelete();
+            await dbContext.Authors.Where(author => author.Id == id).ExecuteDeleteAsync();
         }
     }
 }

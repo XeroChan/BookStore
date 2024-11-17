@@ -20,22 +20,26 @@ public class InMemSubscriptionRepository : ISubscriptionRepository
             CredentialId = 1
         }
     };
-    public IEnumerable<Subscription> GetAll()
+    public async Task<IEnumerable<Subscription>> GetAllAsync()
     {
-        return subscriptions;
+        return await Task.FromResult(subscriptions);
     }
-    public Subscription? Get(int id)
+    public async Task<Subscription?> GetAsync(int id)
     {
-        return subscriptions.Find(author => author.Id == id);
+        return await Task.FromResult(subscriptions.Find(author => author.Id == id));
     }
-    public void Create(Subscription subscription)
+    public async Task CreateAsync(Subscription subscription)
     {
         subscription.Id = subscriptions.Max(subscription => subscription.Id) + 1;
         subscriptions.Add(subscription);
+
+        await Task.CompletedTask;
     }
-    public void Delete(int id)
+    public async Task DeleteAsync(int id)
     {
         var index = subscriptions.FindIndex(subscription => subscription.Id == id);
         subscriptions.RemoveAt(index);
+
+        await Task.CompletedTask;
     }
 }

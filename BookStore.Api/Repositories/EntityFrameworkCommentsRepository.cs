@@ -13,30 +13,30 @@ public class EntityFrameworkCommentsRepository : ICommentRepository
         this.dbContext = dbContext;
     }
 
-    public IEnumerable<Comment> GetAll()
+    public async Task<IEnumerable<Comment>> GetAllAsync()
     {
-        return dbContext.Comments.AsNoTracking().ToList(); 
+        return await dbContext.Comments.AsNoTracking().ToListAsync();
     }
 
-    public Comment? Get(int id)
+    public async Task<Comment?> GetAsync(int id)
     {
-        return dbContext.Comments.Find(id);
+        return await dbContext.Comments.FindAsync(id);
     }
 
-    public void Create(Comment comment)
+    public async Task CreateAsync(Comment comment)
     {
         dbContext.Comments.Add(comment);
-        dbContext.SaveChanges();
+        await dbContext.SaveChangesAsync();
     }
 
-    public void Update(Comment updatedComment)
+    public async Task UpdateAsync(Comment updatedComment)
     {
         dbContext.Update(updatedComment);
-        dbContext.SaveChanges();
+        await dbContext.SaveChangesAsync();
     }
 
-    public void Delete(int id)
+    public async Task DeleteAsync(int id)
     {
-        dbContext.Comments.Where(comment => comment.Id == id).ExecuteDelete();
+        await dbContext.Comments.Where(comment => comment.Id == id).ExecuteDeleteAsync();
     }
 }

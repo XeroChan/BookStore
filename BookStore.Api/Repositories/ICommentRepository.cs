@@ -4,9 +4,9 @@ namespace BookStore.Api.Repositories;
 
 public interface ICommentRepository
 {
-    void Create(Comment comment);
-    void Delete(int id);
-    Comment? Get(int id);
-    IEnumerable<Comment> GetAll();
-    void Update(Comment updatedComment);
+    Task CreateAsync(Comment comment);
+    Task DeleteAsync(int id);
+    Task<Comment?> GetAsync(int id);
+    Task<IEnumerable<Comment>> GetAllAsync();
+    Task UpdateAsync(Comment updatedComment);
 }

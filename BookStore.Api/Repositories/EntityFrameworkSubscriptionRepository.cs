@@ -13,24 +13,24 @@ public class EntityFrameworkSubscriptionRepository : ISubscriptionRepository
         this.dbContext = dbContext;
     }
 
-    public IEnumerable<Subscription> GetAll()
+    public async Task<IEnumerable<Subscription>> GetAllAsync()
     {
-        return dbContext.Subscriptions.AsNoTracking().ToList(); 
+        return await dbContext.Subscriptions.AsNoTracking().ToListAsync();
     }
 
-    public Subscription? Get(int id)
+    public async Task<Subscription?> GetAsync(int id)
     {
-        return dbContext.Subscriptions.Find(id);
+        return await dbContext.Subscriptions.FindAsync(id);
     }
 
-    public void Create(Subscription subscription)
+    public async Task CreateAsync(Subscription subscription)
     {
         dbContext.Subscriptions.Add(subscription);
-        dbContext.SaveChanges();
+        await dbContext.SaveChangesAsync();
     }
 
-    public void Delete(int id)
+    public async Task DeleteAsync(int id)
     {
-        dbContext.Subscriptions.Where(subscription => subscription.Id == id).ExecuteDelete();
+        await dbContext.Subscriptions.Where(subscription => subscription.Id == id).ExecuteDeleteAsync();
     }
 }

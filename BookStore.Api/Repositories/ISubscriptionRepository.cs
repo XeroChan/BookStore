@@ -4,8 +4,8 @@ namespace BookStore.Api.Repositories;
 
 public interface ISubscriptionRepository
 {
-    void Create(Subscription subscription);
-    void Delete(int id);
-    Subscription? Get(int id);
-    IEnumerable<Subscription> GetAll();
+    Task CreateAsync(Subscription subscription);
+    Task DeleteAsync(int id);
+    Task<Subscription?> GetAsync(int id);
+    Task<IEnumerable<Subscription>> GetAllAsync();
 }
