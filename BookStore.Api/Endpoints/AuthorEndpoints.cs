@@ -1,3 +1,4 @@
+using BookStore.Api.Dtos;
 using BookStore.Api.Entities;
 using BookStore.Api.Repositories;
 
@@ -9,22 +10,26 @@ public static class AuthorEndpoints
     
     public static RouteGroupBuilder MapAuthorEndpoints(this IEndpointRouteBuilder routes)
     {
-        InMemAuthorRepository authorRepository = new();
         var authorsGroup = routes.MapGroup("/authors").WithParameterValidation();
-        authorsGroup.MapGet("/", () => authorRepository.GetAll());
-        authorsGroup.MapGet("/{id}", (int id) =>
+        authorsGroup.MapGet("/", (IAuthorRepository authorRepository) => authorRepository.GetAll().Select(author => author.AsDto()));
+        authorsGroup.MapGet("/{id}", (IAuthorRepository authorRepository, int id) =>
         {
             Author? author = authorRepository.Get(id);
-            return author is not null ? Results.Ok(author) : Results.NotFound();
+            return author is not null ? Results.Ok(author.AsDto()) : Results.NotFound();
         })
         .WithName(GetAuthorEndpointName);
-        authorsGroup.MapPost("/", (Author author) =>
+        authorsGroup.MapPost("/", (IAuthorRepository authorRepository, CreateAuthorDto authorDto) =>
         {
+            Author author = new()
+            {
+                AuthorName = authorDto.AuthorName,
+                AuthorSurname = authorDto.AuthorSurname
+            };
             authorRepository.Create(author);
 
             return Results.CreatedAtRoute(GetAuthorEndpointName, new { id = author.Id }, author);
         });
-        authorsGroup.MapPut("/{id}", (int id, Author updatedAuthor) =>
+        authorsGroup.MapPut("/{id}", (IAuthorRepository authorRepository, int id, AuthorDto updatedAuthorDto) =>
         {
             Author? existingAuthor = authorRepository.Get(id);
 
@@ -32,13 +37,13 @@ public static class AuthorEndpoints
             {
                 return Results.NotFound();
             }
-            existingAuthor.AuthorName = updatedAuthor.AuthorName;
-            existingAuthor.AuthorSurname = updatedAuthor.AuthorSurname;
+            existingAuthor.AuthorName = updatedAuthorDto.AuthorName;
+            existingAuthor.AuthorSurname = updatedAuthorDto.AuthorSurname;
 
             authorRepository.Update(existingAuthor);
             return Results.NoContent();
         });
-        authorsGroup.MapDelete("/{id}", (int id) =>
+        authorsGroup.MapDelete("/{id}", (IAuthorRepository authorRepository, int id) =>
         {
             Author? author = authorRepository.Get(id);
 

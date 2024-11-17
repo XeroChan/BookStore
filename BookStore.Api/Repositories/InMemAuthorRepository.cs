@@ -2,7 +2,7 @@ using BookStore.Api.Entities;
 
 namespace BookStore.Api.Repositories;
 
-public class InMemAuthorRepository
+public class InMemAuthorRepository : IAuthorRepository
 {
     private readonly List<Author> authors = new()
     {

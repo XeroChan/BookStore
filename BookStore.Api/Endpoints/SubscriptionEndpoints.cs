@@ -9,22 +9,21 @@ public static class SubscriptionEndpoints
 
     public static RouteGroupBuilder MapSubscriptionEndpoints(this IEndpointRouteBuilder routes)
     {
-        InMemSubscriptionRepository subscriptionRepository = new();
         var subscriptionsGroup = routes.MapGroup("/subscriptions").WithParameterValidation();
-        subscriptionsGroup.MapGet("/", () => subscriptionRepository.GetAll());
-        subscriptionsGroup.MapGet("/{id}", (int id) =>
+        subscriptionsGroup.MapGet("/", (ISubscriptionRepository subscriptionRepository) => subscriptionRepository.GetAll());
+        subscriptionsGroup.MapGet("/{id}", (ISubscriptionRepository subscriptionRepository, int id) =>
         {
             Subscription? subscription = subscriptionRepository.Get(id);
             return subscription is not null ? Results.Ok(subscription) : Results.NotFound();
         })
         .WithName(GetSubscriptionEndpointName);
-        subscriptionsGroup.MapPost("", (Subscription subscription) =>
+        subscriptionsGroup.MapPost("", (ISubscriptionRepository subscriptionRepository, Subscription subscription) =>
         {
             subscriptionRepository.Create(subscription);
 
             return Results.CreatedAtRoute(GetSubscriptionEndpointName, new { id = subscription.Id }, subscription);
         });
-        subscriptionsGroup.MapDelete("/{id}", (int id) =>
+        subscriptionsGroup.MapDelete("/{id}", (ISubscriptionRepository subscriptionRepository, int id) =>
         {
             Subscription? subscription = subscriptionRepository.Get(id);
 

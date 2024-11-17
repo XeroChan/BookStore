@@ -2,7 +2,7 @@ using BookStore.Api.Entities;
 
 namespace BookStore.Api.Repositories;
 
-public class InMemCommentRepository
+public class InMemCommentRepository : ICommentRepository
 {
     private readonly List<Comment> comments = new()
     {
@@ -29,7 +29,7 @@ public class InMemCommentRepository
     }
     public Comment? Get(int id)
     {
-        return comments.Find(author => author.Id == id);
+        return comments.Find(comment => comment.Id == id);
     }
     public void Create(Comment comment)
     {
@@ -43,7 +43,7 @@ public class InMemCommentRepository
     }
     public void Delete(int id)
     {
-        var index = comments.FindIndex(author => author.Id == id);
+        var index = comments.FindIndex(comment => comment.Id == id);
         comments.RemoveAt(index);
     }
 }
