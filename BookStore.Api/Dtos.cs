@@ -35,64 +35,31 @@ public record BookDtoV2
 
 public record CreateBookDto
 (
-    [Required] // server side validation, need a NuGet validator as well/ endpoint filter
-    [StringLength(100)]
-    string Title,
-    [Required]
-    int AuthorId,
-    [Required]
-    [StringLength(40)]
-    string Publisher,
-    [Required]
-    [StringLength(50)]
-    string Genre,
-    [Required]
-    [StringLength(800)]
-    string Description,
-    [Required]
-    [StringLength(13)]
-    string ISBN,
-    [Required]
-    [Range(1, 2000)]
-    int PagesCount,
-    [Required]
-    [Range(1, 200)]
-    decimal Price,
+    [Required][StringLength(100)] string Title,
+    [Required] int AuthorId,
+    [Required][StringLength(40)] string Publisher,
+    [Required][StringLength(50)] string Genre,
+    [Required][StringLength(800)] string Description,
+    [Required][StringLength(13)] string ISBN,
+    [Required][Range(1, 2000)] int PagesCount,
+    [Required][Range(1, 200)] decimal Price,
     DateTime ReleaseDate,
-    [Url]
-    [StringLength(250)]
-    string ImageUri
+    [Url][StringLength(250)] string ImageUri
 );
 
 public record UpdateBookDto
 (
-    [Required] // server side validation, need a NuGet validator as well/ endpoint filter
-    [StringLength(100)]
-    string Title,
-    [Required]
-    int AuthorId,
-    [Required]
-    [StringLength(40)]
-    string Publisher,
-    [Required]
-    [StringLength(50)]
-    string Genre,
-    [Required]
-    [StringLength(800)]
-    string Description,
-    [Required]
-    [StringLength(13)]
-    string ISBN,
-    [Required]
-    [Range(1, 2000)]
-    int PagesCount,
-    [Required]
-    [Range(1, 200)]
+    [Required][StringLength(100)] string Title,
+    [Required] int AuthorId,
+    [Required][StringLength(40)] string Publisher,
+    [Required][StringLength(50)] string Genre,
+    [Required][StringLength(800)] string Description,
+    [Required][StringLength(13)] string ISBN,
+    [Required][Range(1, 2000)] int PagesCount,
+    [Required][Range(1, 200)]
     decimal Price,
     DateTime ReleaseDate,
-    [Url]
-    [StringLength(250)]
-    string ImageUri
+    [Url][StringLength(250)] string ImageUri
 );
 
 public record ClientDto
@@ -106,38 +73,18 @@ public record ClientDto
 
 public record CreateClientDto
 (
-    [Required]
-    [StringLength(50)]
-    string Name,
-    [Required]
-    [StringLength(50)]
-    string Surname,
-    [Required]
-    [StringLength(100)]
-    [EmailAddress]
-    string Email,
-    [Required]
-    [StringLength(9)]
-    [Phone]
-    string Telephone
+    [Required][StringLength(50)] string Name,
+    [Required][StringLength(50)] string Surname,
+    [Required][StringLength(100)][EmailAddress] string Email,
+    [Required][StringLength(9)][Phone] string Telephone
 );
 
 public record UpdateClientDto
 (
-    [Required]
-    [StringLength(50)]
-    string Name,
-    [Required]
-    [StringLength(50)]
-    string Surname,
-    [Required]
-    [StringLength(100)]
-    [EmailAddress]
-    string Email,
-    [Required]
-    [StringLength(9)]
-    [Phone]
-    string Telephone
+    [Required][StringLength(50)] string Name,
+    [Required][StringLength(50)] string Surname,
+    [Required][StringLength(100)][EmailAddress] string Email,
+    [Required][StringLength(9)][Phone] string Telephone
 );
 
 public record CredentialDto
@@ -152,11 +99,8 @@ public record CredentialDto
 public record CreateCredentialDto
 (
     int ClientId,
-    [Required]
-    [StringLength(20)]
-    string Username,
-    [Required]
-    [StringLength(20)]
+    [Required][StringLength(20)] string Username,
+    [Required][StringLength(20)]
     string Password,
     bool IsAdmin
 );
@@ -164,12 +108,8 @@ public record CreateCredentialDto
 public record UpdateCredentialDto
 (
     int ClientId,
-    [Required]
-    [StringLength(20)]
-    string Username,
-    [Required]
-    [StringLength(20)]
-    string Password,
+    [Required][StringLength(20)] string Username,
+    [Required][StringLength(20)] string Password,
     bool IsAdmin
 );
 
@@ -196,4 +136,45 @@ public record UpdateRentalDto
     int BookId,
     DateTime RentalDate,
     DateTime DueDate
+);
+
+public record AuthorDto
+(
+    int Id,
+    int CredentialId,
+    [Required][StringLength(60)] string AuthorName,
+    [Required][StringLength(60)] string AuthorSurname
+);
+
+public record CreateAuthorDto
+(
+    [Required][StringLength(60)] string AuthorName,
+    [Required][StringLength(60)] string AuthorSurname
+);
+
+public record UpdateAuthorDto
+(
+    [Required][StringLength(60)] string AuthorName,
+    [Required][StringLength(60)] string AuthorSurname
+);
+
+public record CommentDto
+(
+    int Id,
+    int BookId,
+    int CredentialId,
+    [Required][StringLength(250)] string CommentString,
+    [Required] int Rating
+);
+
+public record CreateCommentDto
+(
+    [Required][StringLength(250)] string CommentString,
+    [Required] int Rating
+);
+
+public record UpdateCommentDto
+(
+    [Required][StringLength(250)] string CommentString,
+    [Required] int Rating
 );
