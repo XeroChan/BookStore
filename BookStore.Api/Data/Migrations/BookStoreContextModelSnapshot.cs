@@ -22,6 +22,34 @@ namespace BookStore.Api.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("BookStore.Api.Entities.Author", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AuthorName")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<string>("AuthorSurname")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<int>("CredentialId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CredentialId");
+
+                    b.ToTable("Authors");
+                });
+
             modelBuilder.Entity("BookStore.Api.Entities.Book", b =>
                 {
                     b.Property<int>("Id")
@@ -30,10 +58,9 @@ namespace BookStore.Api.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Author")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                    b.Property<int>("AuthorId")
+                        .HasColumnType("int")
+                        .HasColumnName("author_id");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -116,6 +143,37 @@ namespace BookStore.Api.Data.Migrations
                     b.ToTable("Clients");
                 });
 
+            modelBuilder.Entity("BookStore.Api.Entities.Comment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BookId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CommentString")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<int>("CredentialId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BookId");
+
+                    b.HasIndex("CredentialId");
+
+                    b.ToTable("Comments");
+                });
+
             modelBuilder.Entity("BookStore.Api.Entities.Credential", b =>
                 {
                     b.Property<int>("Id")
@@ -133,6 +191,10 @@ namespace BookStore.Api.Data.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(false)
                         .HasColumnName("is_admin");
+
+                    b.Property<bool>("IsAuthor")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_author");
 
                     b.Property<string>("Password")
                         .IsRequired()
@@ -184,6 +246,59 @@ namespace BookStore.Api.Data.Migrations
                     b.ToTable("Rentals");
                 });
 
+            modelBuilder.Entity("BookStore.Api.Entities.Subscription", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AuthorId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CredentialId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("CredentialId");
+
+                    b.ToTable("Subscriptions");
+                });
+
+            modelBuilder.Entity("BookStore.Api.Entities.Author", b =>
+                {
+                    b.HasOne("BookStore.Api.Entities.Credential", "Credential")
+                        .WithMany()
+                        .HasForeignKey("CredentialId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Credential");
+                });
+
+            modelBuilder.Entity("BookStore.Api.Entities.Comment", b =>
+                {
+                    b.HasOne("BookStore.Api.Entities.Book", "Book")
+                        .WithMany()
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BookStore.Api.Entities.Credential", "Credential")
+                        .WithMany()
+                        .HasForeignKey("CredentialId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Book");
+
+                    b.Navigation("Credential");
+                });
+
             modelBuilder.Entity("BookStore.Api.Entities.Credential", b =>
                 {
                     b.HasOne("BookStore.Api.Entities.Client", "Client")
@@ -212,6 +327,25 @@ namespace BookStore.Api.Data.Migrations
                     b.Navigation("Book");
 
                     b.Navigation("Client");
+                });
+
+            modelBuilder.Entity("BookStore.Api.Entities.Subscription", b =>
+                {
+                    b.HasOne("BookStore.Api.Entities.Author", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("BookStore.Api.Entities.Credential", "Credential")
+                        .WithMany()
+                        .HasForeignKey("CredentialId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Credential");
                 });
 #pragma warning restore 612, 618
         }

@@ -11,10 +11,13 @@ public class BookStoreContext : DbContext // session with database, used to quer
     {
     }
 
+    public DbSet<Author> Authors => Set<Author>();
     public DbSet<Book> Books => Set<Book>();
     public DbSet<Client> Clients => Set<Client>();
+    public DbSet<Comment> Comments => Set<Comment>();
     public DbSet<Credential> Credentials => Set<Credential>();
     public DbSet<Rental> Rentals => Set<Rental>();
+    public DbSet<Subscription> Subscriptions => Set<Subscription>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
