@@ -2,7 +2,7 @@ using BookStore.Api.Entities;
 
 namespace BookStore.Api.Repositories;
 
-public class InMemSubscriptionRepository
+public class InMemSubscriptionRepository : ISubscriptionRepository
 {
     private readonly List<Subscription> subscriptions = new()
     {
@@ -28,19 +28,14 @@ public class InMemSubscriptionRepository
     {
         return subscriptions.Find(author => author.Id == id);
     }
-    public void Create(Subscription comment)
+    public void Create(Subscription subscription)
     {
-        comment.Id = subscriptions.Max(comment => comment.Id) + 1;
-        subscriptions.Add(comment);
-    }
-    public void Update(Subscription updatedComment)
-    {
-        var index = subscriptions.FindIndex(comment => comment.Id == updatedComment.Id);
-        subscriptions[index] = updatedComment;
+        subscription.Id = subscriptions.Max(subscription => subscription.Id) + 1;
+        subscriptions.Add(subscription);
     }
     public void Delete(int id)
     {
-        var index = subscriptions.FindIndex(author => author.Id == id);
+        var index = subscriptions.FindIndex(subscription => subscription.Id == id);
         subscriptions.RemoveAt(index);
     }
 }
