@@ -19,10 +19,13 @@ public static class DataExtensions
     {
         var connString = configuration.GetConnectionString("BookStoreContext");// reads config by appsettings.json or from secret manager as of now
         services.AddSqlServer<BookStoreContext>(connString) // configure the sql server with conn string 
+            .AddScoped<IAuthorRepository, EntityFrameworkAuthorsRepository>()
             .AddScoped<IBooksRepository, EntityFrameworkBooksRepository>()
             .AddScoped<IClientRepository, EntityFrameworkClientsRepository>()
+            .AddScoped<ICommentRepository, EntityFrameworkCommentsRepository>()
             .AddScoped<ICredentialRepository, EntityFrameworkCredentialsRepository>()
-            .AddScoped<IRentalRepository, EntityFrameworkRentalsRepository>();
+            .AddScoped<IRentalRepository, EntityFrameworkRentalsRepository>()
+            .AddScoped<ISubscriptionRepository, EntityFrameworkSubscriptionRepository>();
 
         // add the interface that connects to repo as 1st arg, 2nd param is what type to activate when someone requests
         // the interface
