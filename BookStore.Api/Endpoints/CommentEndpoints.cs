@@ -11,27 +11,27 @@ public static class CommentEndpoints
     public static RouteGroupBuilder MapCommentEndpoints(this IEndpointRouteBuilder routes)
     {
         var commentsGroup = routes.MapGroup("/comments").WithParameterValidation();
-        commentsGroup.MapGet("/", (ICommentRepository commentRepository) => commentRepository.GetAllAsync().Select(comment => comment.AsDto()));
-        commentsGroup.MapGet("/{id}", (ICommentRepository commentRepository, int id) =>
+        commentsGroup.MapGet("/", async (ICommentRepository commentRepository) => (await commentRepository.GetAllAsync()).Select(comment => comment.AsDto()));
+        commentsGroup.MapGet("/{id}", async (ICommentRepository commentRepository, int id) =>
         {
-            Comment? comment = commentRepository.GetAsync(id);
+            Comment? comment = await commentRepository.GetAsync(id);
             return comment is not null ? Results.Ok(comment.AsDto()) : Results.NotFound();
         })
         .WithName(GetCommentEndpointName);
-        commentsGroup.MapPost("/", (ICommentRepository commentRepository, CommentDto commentDto) =>
+        commentsGroup.MapPost("/", async (ICommentRepository commentRepository, CommentDto commentDto) =>
         {
             Comment comment = new()
             {
                 CommentString = commentDto.CommentString,
                 Rating = commentDto.Rating
             };
-            commentRepository.CreateAsync(comment);
+            await commentRepository.CreateAsync(comment);
 
             return Results.CreatedAtRoute(GetCommentEndpointName, new { id = comment.Id }, comment);
         });
-        commentsGroup.MapPut("/{id}", (ICommentRepository commentRepository, int id, CommentDto updatedCommentDto) =>
+        commentsGroup.MapPut("/{id}", async (ICommentRepository commentRepository, int id, CommentDto updatedCommentDto) =>
         {
-            Comment? existingComment = commentRepository.GetAsync(id);
+            Comment? existingComment = await commentRepository.GetAsync(id);
 
             if (existingComment == null)
             {
@@ -40,16 +40,16 @@ public static class CommentEndpoints
             existingComment.CommentString = updatedCommentDto.CommentString;
             existingComment.Rating = updatedCommentDto.Rating;
 
-            commentRepository.UpdateAsync(existingComment);
+            await commentRepository.UpdateAsync(existingComment);
             return Results.NoContent();
         });
-        commentsGroup.MapDelete("/{id}", (ICommentRepository commentRepository, int id) =>
+        commentsGroup.MapDelete("/{id}", async (ICommentRepository commentRepository, int id) =>
         {
-            Comment? comment = commentRepository.GetAsync(id);
+            Comment? comment = await commentRepository.GetAsync(id);
 
             if (comment is not null)
             {
-                commentRepository.DeleteAsync(id);
+                await commentRepository.DeleteAsync(id);
             }
 
             return Results.NoContent();

@@ -11,27 +11,27 @@ public static class AuthorEndpoints
     public static RouteGroupBuilder MapAuthorEndpoints(this IEndpointRouteBuilder routes)
     {
         var authorsGroup = routes.MapGroup("/authors").WithParameterValidation();
-        authorsGroup.MapGet("/", (IAuthorRepository authorRepository) => authorRepository.GetAllAsync().Select(author => author.AsDto()));
-        authorsGroup.MapGet("/{id}", (IAuthorRepository authorRepository, int id) =>
+        authorsGroup.MapGet("/", async (IAuthorRepository authorRepository) => (await authorRepository.GetAllAsync()).Select(author => author.AsDto()));
+        authorsGroup.MapGet("/{id}", async (IAuthorRepository authorRepository, int id) =>
         {
-            Author? author = authorRepository.GetAsync(id);
+            Author? author = await authorRepository.GetAsync(id);
             return author is not null ? Results.Ok(author.AsDto()) : Results.NotFound();
         })
         .WithName(GetAuthorEndpointName);
-        authorsGroup.MapPost("/", (IAuthorRepository authorRepository, CreateAuthorDto authorDto) =>
+        authorsGroup.MapPost("/", async (IAuthorRepository authorRepository, CreateAuthorDto authorDto) =>
         {
             Author author = new()
             {
                 AuthorName = authorDto.AuthorName,
                 AuthorSurname = authorDto.AuthorSurname
             };
-            authorRepository.CreateAsync(author);
+            await authorRepository.CreateAsync(author);
 
             return Results.CreatedAtRoute(GetAuthorEndpointName, new { id = author.Id }, author);
         });
-        authorsGroup.MapPut("/{id}", (IAuthorRepository authorRepository, int id, AuthorDto updatedAuthorDto) =>
+        authorsGroup.MapPut("/{id}", async (IAuthorRepository authorRepository, int id, AuthorDto updatedAuthorDto) =>
         {
-            Author? existingAuthor = authorRepository.GetAsync(id);
+            Author? existingAuthor = await authorRepository.GetAsync(id);
 
             if (existingAuthor == null)
             {
@@ -40,16 +40,16 @@ public static class AuthorEndpoints
             existingAuthor.AuthorName = updatedAuthorDto.AuthorName;
             existingAuthor.AuthorSurname = updatedAuthorDto.AuthorSurname;
 
-            authorRepository.UpdateAsync(existingAuthor);
+            await authorRepository.UpdateAsync(existingAuthor);
             return Results.NoContent();
         });
-        authorsGroup.MapDelete("/{id}", (IAuthorRepository authorRepository, int id) =>
+        authorsGroup.MapDelete("/{id}", async (IAuthorRepository authorRepository, int id) =>
         {
-            Author? author = authorRepository.GetAsync(id);
+            Author? author = await authorRepository.GetAsync(id);
 
             if (author is not null)
             {
-                authorRepository.DeleteAsync(id);
+                await authorRepository.DeleteAsync(id);
             }
 
             return Results.NoContent();
