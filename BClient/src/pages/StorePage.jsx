@@ -6,8 +6,14 @@ import {
   CardContent,
   CardMedia,
   CardActions,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  MenuItem,
   Paper,
-  Snackbar,
+  Select,
   Table,
   TableBody,
   TableCell,
@@ -15,7 +21,6 @@ import {
   TableHead,
   TableRow,
   TextField,
-  ThemeProvider,
   Toolbar,
   Typography,
 } from "@mui/material";
@@ -26,6 +31,13 @@ import SearchBar from "../components/SearchBar";
 import { theme } from "../components/theme";
 import * as api from "../api/data";
 import LogoutTimer from "../components/LogoutTimer";
+import BookCard from "../components/BookCard";
+import RentalDatePicker from "../components/RentalDatePicker";
+import RentalSnackbar from "../components/RentalSnackbar";
+import ClientRentals from "../components/ClientRentals";
+import BookForm from "../components/BookForm";
+import AuthorsTable from '../components/AuthorsTable';
+import ConfirmationDialog from '../components/ConfirmationDialog';
 
 export const StorePage = () => {
   const navigate = useNavigate();
@@ -36,10 +48,18 @@ export const StorePage = () => {
   const [clients, setClients] = useState([]);
   const [client, setClient] = useState([]);
   const [isAdmin, setIsAdmin] = useState([]);
+  const [comments, setComments] = useState([]);
+  const [bookTitles, setBookTitles] = useState({});
+  const [newComment, setNewComment] = useState("");
+  const [newRating, setNewRating] = useState(0);
+  const [open, setOpen] = useState(false);
+  const [reviews, setReviews] = useState([]);
   const [selectedBookId, setSelectedBookId] = useState(null);
   const [dueDate, setDueDate] = useState("");
   const [showAddBookForm, setShowAddBookForm] = useState(false);
   const [editBook] = useState(null);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedSubscription, setSelectedSubscription] = useState(null);
   const [bookDetails, setBookDetails] = useState({
     title: "",
     author: "",
@@ -52,6 +72,72 @@ export const StorePage = () => {
     releaseDate: "",
     imageUri: "",
   });
+  const [newPublications, setNewPublications] = useState([]);
+  const [authors, setAuthors] = useState([]);
+  const [subscriptions, setSubscriptions] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const authorsData = await api.fetchAuthors();
+      setAuthors(authorsData);
+      if (user) {
+        const subscriptionsData = await api.fetchSubscriptionsForUser(
+          user.clientId
+        );
+        setSubscriptions(subscriptionsData);
+      }
+    };
+
+    fetchData();
+  }, [user]);
+
+  const handleSubscribeToAuthor = async (authorId) => {
+    if (user) {
+      await api.subscribeToAuthor(user.clientId, authorId);
+      // Refresh new publications
+      api.fetchNewPublicationsForUser(user.clientId).then(setNewPublications);
+      // Refresh subscriptions
+      const subscriptionsData = await api.fetchSubscriptionsForUser(
+        user.clientId
+      );
+      setSubscriptions(subscriptionsData);
+    } else {
+      console.error("User is not logged in");
+    }
+  };
+
+  const handleUnsubscribeFromAuthor = async () => {
+    if (selectedSubscription) {
+      console.log("Unsubscribing from author:", selectedSubscription);
+      await api.unsubscribeFromAuthor(selectedSubscription);
+      // Refresh subscriptions
+      const subscriptionsData = await api.fetchSubscriptionsForUser(user.clientId);
+      setSubscriptions(subscriptionsData);
+      setOpenDialog(false);
+    }
+  };
+
+  const getSubscriptionId = (authorId) => {
+    const subscription = subscriptions.find(subscription => subscription.authorId === authorId);
+    return subscription ? subscription.id : null;
+  };
+
+  const isSubscribed = (authorId) => {
+    return subscriptions.some(
+      (subscription) => subscription.authorId === authorId
+    );
+  };
+
+  const handleOpenDialog = (subscription) => {
+    setSelectedSubscription(subscription);
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setSelectedSubscription(null);
+  };
+
   useEffect(() => {
     // This will run whenever editBook changes
     console.log("bookDetails updated:", bookDetails);
@@ -95,7 +181,22 @@ export const StorePage = () => {
     // Fetch books and rentals regardless of admin status
     api.fetchBooks(setBooks);
     api.fetchRentals(setRentals);
-  }, [user]); // Fetch user info only when user changes
+    if (user) {
+      api.fetchUserComments(user.clientId, async (comments) => {
+        setComments(comments);
+        const titles = {};
+        for (const comment of comments) {
+          const bookDetails = await api.fetchBookDetails(comment.bookId);
+          if (bookDetails) {
+            titles[comment.bookId] = bookDetails.title;
+          }
+        }
+        setBookTitles(titles);
+      });
+      api.fetchNewPublicationsForUser(user.clientId).then(setNewPublications);
+      api.fetchAuthors().then(setAuthors);
+    }
+  }, [user]);
 
   useEffect(() => {
     // If user is an admin, fetch clients and set admin status
@@ -110,7 +211,6 @@ export const StorePage = () => {
       setIsAdmin(false);
     }
   }, [user]); // Fetch clients only when user changes
-
   useEffect(() => {
     // If user is not an admin, fetch client info
     if (!isAdmin && user && user.clientId) {
@@ -118,12 +218,67 @@ export const StorePage = () => {
       api.fetchClientById(user.clientId, setClient);
     }
   }, [isAdmin, user]);
-
   // Function to handle the Save Changes button click
   useEffect(() => {
     // This will run whenever editBook changes
     console.log("editBook updated:", updatedBook);
   }, [updatedBook]);
+
+  const handlePostComment = async () => {
+    if (selectedBookId && newComment && newRating >= 0 && newRating <= 5) {
+      await api.postComment(
+        user.clientId,
+        selectedBookId,
+        newComment,
+        newRating
+      );
+      // Refresh comments
+      api.fetchUserComments(user.clientId, async (comments) => {
+        setComments(comments);
+        const titles = { ...bookTitles };
+        for (const comment of comments) {
+          if (!titles[comment.bookId]) {
+            const bookDetails = await api.fetchBookDetails(comment.bookId);
+            if (bookDetails) {
+              titles[comment.bookId] = bookDetails.title;
+            }
+          }
+        }
+        setBookTitles(titles);
+      });
+      setNewComment("");
+      setNewRating(0);
+      setSelectedBookId("");
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    await api.deleteComment(commentId);
+    // Refresh comments
+    api.fetchUserComments(user.clientId, async (comments) => {
+      setComments(comments);
+      const titles = { ...bookTitles };
+      for (const comment of comments) {
+        if (!titles[comment.bookId]) {
+          const bookDetails = await api.fetchBookDetails(comment.bookId);
+          if (bookDetails) {
+            titles[comment.bookId] = bookDetails.title;
+          }
+        }
+      }
+      setBookTitles(titles);
+    });
+  };
+
+  const handleOpenReviews = async (bookId) => {
+    const bookReviews = await fetchBookReviews(bookId); // Fetch reviews for the book
+    setReviews(bookReviews);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   const formatDate = (dateString) => {
     const date = DateTime.fromISO(dateString);
@@ -384,36 +539,11 @@ export const StorePage = () => {
           }}
         >
           {booksToShow.map((book) => (
-            <Card key={book.id} style={{ width: "250px" }}>
-              <CardMedia
-                component="img"
-                alt={book.title}
-                height="250"
-                image={book.imageUri}
-                style={{ objectFit: "cover", maxWidth: "100%" }}
-              />
-              <CardContent>
-                <Typography variant="h6">{book.title}</Typography>
-                <Typography variant="subtitle1" color="textSecondary">
-                  {book.author}
-                </Typography>
-                <Typography variant="body2">{book.price} zł</Typography>
-              </CardContent>
-              <CardActions
-                style={{ justifyContent: "center", marginTop: "30px" }}
-              >
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => {
-                    handleRentBook(book.id);
-                    console.log(book);
-                  }}
-                >
-                  Wypożycz
-                </Button>
-              </CardActions>
-            </Card>
+            <BookCard
+              key={book.id}
+              book={book}
+              onRent={handleRentBook} // Przekazujemy funkcję do obsługi wypożyczenia
+            />
           ))}
         </div>
         {/* Render pagination controls */}
@@ -463,80 +593,29 @@ export const StorePage = () => {
         {renderBookCatalog()}
 
         {selectedBookId && (
-          <div
-            style={{ marginTop: "20px", display: "flex", alignItems: "center" }}
-          >
-            <TextField
-              id="due-date"
-              label="Data  oddania"
-              type="datetime-local"
-              value={dueDate}
-              onChange={handleDueDateChange}
-              InputLabelProps={{
-                shrink: true,
-              }}
-              style={{ marginRight: "10px" }}
-            />
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleBookRental}
-            >
-              Wypożycz książkę
-            </Button>
-          </div>
-        )}
-        {/* Render Snackbar component */}
-        {rentalSuccess && (
-          <Snackbar
-            open={rentalSuccess}
-            autoHideDuration={1800}
-            onClose={handleSnackbarClose}
-            message="Pomyślnie wypożyczono."
-            anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          <RentalDatePicker
+            dueDate={dueDate}
+            handleDueDateChange={handleDueDateChange}
+            handleBookRental={handleBookRental}
           />
         )}
+
+        <RentalSnackbar
+          rentalSuccess={rentalSuccess}
+          handleSnackbarClose={handleSnackbarClose}
+        />
+
         {/* Display the list of client rentals */}
         <div style={{ marginTop: "40px" }}>
           <h2>Twoje wypożyczenia</h2>
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Tytuł</TableCell>
-                  <TableCell>Autor</TableCell>
-                  <TableCell>Cena</TableCell>
-                  <TableCell>Imię</TableCell>
-                  <TableCell>Nazwisko</TableCell>
-                  <TableCell>Email</TableCell>
-                  <TableCell>Data wypożyczenie</TableCell>
-                  <TableCell>Data oddania</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {rentalsToShow.map((rental) => {
-                  const book = getBookById(rental.bookId);
 
-                  return (
-                    <TableRow key={rental.id}>
-                      <TableCell>{book?.title || "N/A"}</TableCell>
-                      <TableCell>{book?.author || "N/A"}</TableCell>
-                      <TableCell>{book?.price + " zł" || "N/A"}</TableCell>
-                      <TableCell>{client?.name || "N/A"}</TableCell>
-                      <TableCell>{client?.surname || "N/A"}</TableCell>
-                      <TableCell>{client?.email || "N/A"}</TableCell>
-                      <TableCell>
-                        {formatDate(rental.rentalDate) || "N/A"}
-                      </TableCell>
-                      <TableCell>
-                        {formatDate(rental.dueDate) || "N/A"}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </TableContainer>
+          <ClientRentals
+            rentalsToShow={rentalsToShow}
+            getBookById={getBookById}
+            client={client}
+            formatDate={formatDate}
+          />
+
           {/* Render pagination controls */}
           <Stack spacing={2} style={{ marginTop: "5vh", textAlign: "center" }}>
             <Pagination
@@ -600,7 +679,18 @@ export const StorePage = () => {
             style={{ marginLeft: "auto", marginRight: "auto" }} // Center pagination
           />
         </Stack>
-        {(showAddBookForm || editBook) && renderBookForm()}
+        {(showAddBookForm || editBook) && (
+          <BookForm
+            bookDetails={bookDetails}
+            setBookDetails={setBookDetails}
+            showAddBookForm={showAddBookForm}
+            isEditing={isEditing}
+            handleAddBook={handleAddBook}
+            handleEditBook={handleEditBook}
+            setShowAddBookForm={setShowAddBookForm}
+            theme={theme}
+          />
+        )}
 
         {/* Display Existing Books */}
         <h3>Katalog</h3>
@@ -712,267 +802,140 @@ export const StorePage = () => {
     });
   }
 
-  function renderBookForm() {
-    const handleChange = (e) => {
-      setBookDetails((prevState) => ({
-        ...prevState,
-        [e.target.name]: e.target.value,
-      }));
-    };
-    const maxTitleLength = 100;
-    const maxAuthorLength = 30;
-    const maxPublisherLength = 40;
-    const maxGenreLength = 50;
-    const maxDescriptionLength = 800;
-    const maxISBNLength = 13;
-    const minPagesCount = 1;
-    const maxPagesCount = 2000;
-    const maxPrice = 200;
-    const maxUriLength = 250;
+  <BookForm
+    bookDetails={bookDetails}
+    setBookDetails={setBookDetails}
+    showAddBookForm={showAddBookForm}
+    isEditing={isEditing}
+    handleAddBook={handleAddBook}
+    handleEditBook={handleEditBook}
+    setShowAddBookForm={setShowAddBookForm}
+    theme={theme}
+  />;
 
-    return (
-      <ThemeProvider theme={theme}>
-        <div>
-          <form>
+  return (
+    <div>
+      <AppBar position="static">
+        <Toolbar>
+          <LogoutTimer onTimeout={handleLogout} />
+          {user && (
+            <div style={{ marginLeft: "auto" }}>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={handleLogout}
+              >
+                Wyloguj się
+              </Button>
+            </div>
+          )}
+          <Button
+            color="inherit"
+            onClick={() => {
+              console.log("Navigating with user:", user); // Add this log
+              navigate("/userpage", { state: { user } });
+            }}
+          >
+            Moje Subskrypcje
+          </Button>
+        </Toolbar>
+      </AppBar>
+
+      {/* Main content */}
+      <div>
+        <h1>Księgarnia</h1>
+        {/* Display user information */}
+        <h3>Nowe Publikacje Ulubionych Twórców</h3>
+        <ul>
+          {newPublications.map((publication) => (
+            <li key={publication.id}>
+              <strong>{publication.title}</strong> by {publication.author}
+            </li>
+          ))}
+        </ul>
+        {isAdmin ? renderAdminSection() : renderClientSection()}
+        <h3>Lista Twórców</h3>
+        <AuthorsTable
+        authors={authors}
+        getSubscriptionId={getSubscriptionId}
+        handleSubscribeToAuthor={handleSubscribeToAuthor}
+        handleOpenDialog={handleOpenDialog}
+      />
+      <ConfirmationDialog
+        open={openDialog}
+        handleClose={handleCloseDialog}
+        handleConfirm={handleUnsubscribeFromAuthor}
+      />
+        {user && (
+          <div>
+            <h3>Dodaj Komentarz</h3>
             <TextField
-              label="Tytuł"
-              name="title"
-              variant="outlined"
+              label="Komentarz"
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
               fullWidth
-              margin="normal"
-              value={showAddBookForm ? bookDetails.title : ""}
-              onChange={handleChange}
-              inputProps={{ maxLength: maxTitleLength }}
-              helperText={`Remaining characters: ${
-                maxTitleLength - bookDetails.title.length
-              }`}
             />
             <TextField
-              label="Autor"
-              name="author"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              value={showAddBookForm ? bookDetails.author : ""}
-              onChange={handleChange}
-              inputProps={{ maxLength: maxAuthorLength }}
-              helperText={`Remaining characters: ${
-                maxAuthorLength - bookDetails.author.length
-              }`}
-            />
-            <TextField
-              label="Publisher"
-              name="publisher"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              value={showAddBookForm ? bookDetails.publisher : ""}
-              onChange={handleChange}
-              inputProps={{ maxLength: maxPublisherLength }}
-              helperText={`Remaining characters: ${
-                maxPublisherLength - bookDetails.publisher.length
-              }`}
-            />
-            <TextField
-              label="Genre"
-              name="genre"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              value={showAddBookForm ? bookDetails.genre : ""}
-              onChange={handleChange}
-              inputProps={{ maxLength: maxGenreLength }}
-              helperText={`Remaining characters: ${
-                maxGenreLength - bookDetails.genre.length
-              }`}
-            />
-            <TextField
-              label="Description"
-              name="description"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              value={showAddBookForm ? bookDetails.description : ""}
-              onChange={handleChange}
-              inputProps={{ maxLength: maxDescriptionLength }}
-              helperText={`Remaining characters: ${
-                maxDescriptionLength - bookDetails.description.length
-              }`}
-            />
-            <TextField
-              label="ISBN"
-              name="isbn"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              type="text"
-              value={showAddBookForm ? bookDetails.isbn : ""}
-              onChange={(e) => {
-                setBookDetails((prevState) => ({
-                  ...prevState,
-                  [e.target.name]: e.target.value,
-                }));
-                const inputValue = e.target.value;
-                const numericValue = inputValue.replace(/[^0-9]/g, ""); // Remove non-numeric characters
-                const limitedValue = numericValue.slice(0, 13); // Limit to 13 characters
-                setBookDetails({ ...bookDetails, isbn: limitedValue });
-              }}
-              inputProps={{ maxLength: maxISBNLength }}
-              helperText={`Remaining characters: ${
-                maxISBNLength - bookDetails.isbn.length
-              }`}
-            />
-            <TextField
-              label="Pages Count"
-              name="pagesCount"
-              variant="outlined"
-              fullWidth
-              margin="normal"
+              label="Ocena"
               type="number"
-              value={showAddBookForm ? bookDetails.pagesCount : ""}
-              onChange={(e) => {
-                setBookDetails((prevState) => ({
-                  ...prevState,
-                  [e.target.name]: e.target.value,
-                }));
-                const value = parseInt(e.target.value, 10);
-                if (!isNaN(value)) {
-                  setBookDetails({ ...bookDetails, pagesCount: value });
-                }
-              }}
-              inputProps={{ max: maxPagesCount, min: minPagesCount }}
-              helperText={`Minimum Pages Count: ${minPagesCount}. Pages until limit: ${
-                maxPagesCount - bookDetails.pagesCount.valueOf()
-              }`}
-            />
-
-            <TextField
-              label="Cena"
-              name="price"
-              variant="outlined"
+              value={newRating}
+              onChange={(e) => setNewRating(Number(e.target.value))}
+              inputProps={{ min: 0, max: 5 }}
               fullWidth
-              margin="normal"
-              type="number"
-              value={showAddBookForm ? bookDetails.price : ""}
-              onChange={(e) => {
-                const value = parseFloat(e.target.value);
-                if (!isNaN(value) && value <= maxPrice) {
-                  setBookDetails((prevState) => ({
-                    ...prevState,
-                    [e.target.name]: value,
-                  }));
-                }
-              }}
-              inputProps={{ max: maxPrice }}
-              helperText={`Remaining value before reaching maximum price: ${
-                maxPrice - bookDetails.price.valueOf()
-              }`}
             />
-
-            <TextField
-              label="Release Date"
-              name="releaseDate"
-              variant="outlined"
+            <Select
+              value={selectedBookId}
+              onChange={(e) => setSelectedBookId(e.target.value)}
               fullWidth
-              margin="normal"
-              type="date"
-              value={showAddBookForm ? bookDetails.releaseDate : ""}
-              onChange={handleChange}
-              InputLabelProps={{
-                shrink: true,
-              }}
-            />
-            <TextField
-              label="ImageUri"
-              name="imageUri"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              value={showAddBookForm ? bookDetails.imageUri : ""}
-              onChange={handleChange}
-              inputProps={{ maxLength: maxUriLength }}
-              helperText={`Remaining characters: ${
-                maxUriLength - bookDetails.imageUri.length
-              }`}
-            />
-            {/* Buttons */}
+            >
+              {books.map((book) => (
+                <MenuItem key={book.id} value={book.id}>
+                  {book.title}
+                </MenuItem>
+              ))}
+            </Select>
             <Button
               variant="contained"
               color="primary"
-              onClick={isEditing ? handleEditBook : handleAddBook}
-              style={{ marginRight: "10px" }}
+              onClick={handlePostComment}
             >
-              {isEditing ? "Save Changes" : "Dodaj książkę"}
+              Dodaj Komentarz
             </Button>
 
-            {/* Button to cancel adding or editing book */}
-            <Button
-              variant="outlined"
-              color="secondary"
-              onClick={() => {
-                setShowAddBookForm(false);
-                setBookDetails({
-                  id: 0,
-                  title: "",
-                  author: "",
-                  publisher: "",
-                  genre: "",
-                  description: "",
-                  isbn: "",
-                  pagesCount: 0,
-                  price: 0,
-                  releaseDate: "",
-                  imageUri: "",
-                });
-              }}
-            >
-              Anuluj
-            </Button>
-          </form>
-        </div>
-      </ThemeProvider>
-    );
-  }
-
-  return (
-    <ThemeProvider theme={theme}>
-      <div style={{ width: "100%", maxWidth: "1200px", margin: "0 auto" }}>
-        {/* AppBar with timer */}
-        <AppBar position="sticky" style={{ backgroundColor: "#1976D2" }}>
-          <Toolbar>
-            {user && <Typography variant="h6">Witaj, {user.sub}!</Typography>}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flex: 1,
-              }}
-            >
-              <LogoutTimer onTimeout={handleLogout} />
-            </div>
-
-            {user && (
-              <div style={{ marginLeft: "auto" }}>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  onClick={handleLogout}
-                >
-                  Wyloguj się
-                </Button>
-              </div>
-            )}
-          </Toolbar>
-        </AppBar>
-
-        {/* Main content */}
-        <div>
-          <h1>Księgarnia</h1>
-          {/* Display user information */}
-          {isAdmin ? renderAdminSection() : renderClientSection()}
-        </div>
+            <h3>Moje Komentarze</h3>
+            <ul>
+              {comments.map((comment) => (
+                <li key={comment.id}>
+                  <strong>{bookTitles[comment.bookId] || "Loading..."}</strong>:{" "}
+                  {comment.commentString} (Ocena: {comment.rating}/5)
+                  <Button onClick={() => handleDeleteComment(comment.id)}>
+                    Usuń
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
-    </ThemeProvider>
+
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>Recenzje</DialogTitle>
+        <DialogContent>
+          <ul>
+            {reviews.map((review) => (
+              <li key={review.id}>
+                <strong>{review.user}</strong>: {review.commentString} (Ocena:{" "}
+                {review.rating}/5)
+              </li>
+            ))}
+          </ul>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            Zamknij
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </div>
   );
 };
