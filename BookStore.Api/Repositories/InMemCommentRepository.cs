@@ -52,4 +52,15 @@ public class InMemCommentRepository : ICommentRepository
 
         await Task.CompletedTask;
     }
+    public Task<IEnumerable<Comment>> GetByUserIdAsync(int userId)
+    {
+        var userComments = comments.Where(c => c.CredentialId == userId);
+        return Task.FromResult(userComments.AsEnumerable());
+    }
+
+    public Task<IEnumerable<Comment>> GetByBookIdAsync(int bookId)
+    {
+        var bookComments = comments.Where(c => c.BookId == bookId);
+        return Task.FromResult(bookComments.AsEnumerable());
+    }
 }

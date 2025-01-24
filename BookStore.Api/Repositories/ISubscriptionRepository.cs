@@ -8,4 +8,6 @@ public interface ISubscriptionRepository
     Task DeleteAsync(int id);
     Task<Subscription?> GetAsync(int id);
     Task<IEnumerable<Subscription>> GetAllAsync();
+    Task<IEnumerable<Subscription>> GetByUserIdAsync(int userId);
+    Task<IEnumerable<Book>> GetNewPublicationsForCredentialAsync(int credentialId);
 }

@@ -33,4 +33,21 @@ public class EntityFrameworkSubscriptionRepository : ISubscriptionRepository
     {
         await dbContext.Subscriptions.Where(subscription => subscription.Id == id).ExecuteDeleteAsync();
     }
+
+    public async Task<IEnumerable<Subscription>> GetByUserIdAsync(int credentialId)
+    {
+        return await dbContext.Subscriptions.Where(s => s.CredentialId == credentialId).ToListAsync();
+    }
+
+    public async Task<IEnumerable<Book>> GetNewPublicationsForCredentialAsync(int credentialId)
+    {
+        var authorIds = await dbContext.Subscriptions
+            .Where(s => s.CredentialId == credentialId)
+            .Select(s => s.AuthorId)
+            .ToListAsync();
+
+        return await dbContext.Books
+            .Where(b => authorIds.Contains(b.AuthorId) && b.DateAdded >= DateTime.UtcNow.AddDays(-30)) // Example: last 30 days
+            .ToListAsync();
+    }
 }

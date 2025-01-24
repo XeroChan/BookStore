@@ -22,7 +22,20 @@ public class EntityFrameworkCommentsRepository : ICommentRepository
     {
         return await dbContext.Comments.FindAsync(id);
     }
-
+    public async Task<IEnumerable<Comment>> GetByUserIdAsync(int userId)
+    {
+        return await dbContext.Comments
+            .AsNoTracking()
+            .Where(comment => comment.CredentialId == userId)
+            .ToListAsync();
+    }
+    public async Task<IEnumerable<Comment>> GetByBookIdAsync(int bookId)
+    {
+        return await dbContext.Comments
+            .AsNoTracking()
+            .Where(comment => comment.BookId == bookId)
+            .ToListAsync();
+    }
     public async Task CreateAsync(Comment comment)
     {
         dbContext.Comments.Add(comment);

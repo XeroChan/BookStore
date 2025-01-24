@@ -19,7 +19,8 @@ public class InMemBooksRepository : IBooksRepository
             PagesCount = 336,
             Price = 18.00M,
             ReleaseDate = new DateTime(2023,12,26),
-            ImageUri = "https://placehold.co/100"
+            ImageUri = "https://placehold.co/100",
+            DateAdded = new DateTime(2023,12,26)
         },
         new Book()
         {
@@ -33,7 +34,8 @@ public class InMemBooksRepository : IBooksRepository
             PagesCount = 320,
             Price = 22.99M,
             ReleaseDate = new DateTime(2018,10,16),
-            ImageUri = "https://placehold.co/100"
+            ImageUri = "https://placehold.co/100",
+            DateAdded = new DateTime(2023,12,26)
         },
         new Book()
         {
@@ -47,7 +49,8 @@ public class InMemBooksRepository : IBooksRepository
             PagesCount = 432,
             Price = 14.49M,
             ReleaseDate = new DateTime(2023,4,25),
-            ImageUri = "https://placehold.co/100"
+            ImageUri = "https://placehold.co/100",
+            DateAdded = new DateTime(2023,12,26)
         }
     };
 
