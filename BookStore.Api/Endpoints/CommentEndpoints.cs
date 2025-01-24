@@ -18,12 +18,34 @@ public static class CommentEndpoints
             return comment is not null ? Results.Ok(comment.AsDto()) : Results.NotFound();
         })
         .WithName(GetCommentEndpointName);
+        commentsGroup.MapGet("/user/{userId}", async (ICommentRepository commentRepository, int userId) =>
+        {
+            var comments = await commentRepository.GetByUserIdAsync(userId);
+            if (!comments.Any())
+            {
+                return Results.NotFound("No comments found for this user.");
+            }
+
+            return Results.Ok(comments.Select(comment => comment.AsDto()));
+        });
+        commentsGroup.MapGet("/book/{bookId}", async (ICommentRepository commentRepository, int bookId) =>
+        {
+            var comments = await commentRepository.GetByBookIdAsync(bookId);
+            if (!comments.Any())
+            {
+                return Results.NotFound("No comments found for this book.");
+            }
+
+            return Results.Ok(comments.Select(comment => comment.AsDto()));
+        });
         commentsGroup.MapPost("/", async (ICommentRepository commentRepository, CommentDto commentDto) =>
         {
             Comment comment = new()
             {
                 CommentString = commentDto.CommentString,
-                Rating = commentDto.Rating
+                Rating = commentDto.Rating,
+                BookId = commentDto.BookId,
+                CredentialId = commentDto.CredentialId
             };
             await commentRepository.CreateAsync(comment);
 

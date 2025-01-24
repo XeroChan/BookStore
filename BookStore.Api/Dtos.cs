@@ -14,7 +14,8 @@ public record BookDtoV1
     int PagesCount,
     decimal Price,
     DateTime ReleaseDate,
-    string ImageUri
+    string ImageUri,
+    DateTime DateAdded
 );
 
 public record BookDtoV2
@@ -30,7 +31,8 @@ public record BookDtoV2
     decimal Price,
     decimal RetailPrice,
     DateTime ReleaseDate,
-    string ImageUri
+    string ImageUri,
+    DateTime DateAdded
 );
 
 public record CreateBookDto
@@ -44,7 +46,8 @@ public record CreateBookDto
     [Required][Range(1, 2000)] int PagesCount,
     [Required][Range(1, 200)] decimal Price,
     DateTime ReleaseDate,
-    [Url][StringLength(250)] string ImageUri
+    [Url][StringLength(250)] string ImageUri,
+    DateTime DateAdded
 );
 
 public record UpdateBookDto
@@ -59,7 +62,8 @@ public record UpdateBookDto
     [Required][Range(1, 200)]
     decimal Price,
     DateTime ReleaseDate,
-    [Url][StringLength(250)] string ImageUri
+    [Url][StringLength(250)] string ImageUri,
+    DateTime DateAdded
 );
 
 public record ClientDto

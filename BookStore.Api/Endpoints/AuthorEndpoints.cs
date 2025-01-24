@@ -1,3 +1,4 @@
+using BookStore.Api.Authorization;
 using BookStore.Api.Dtos;
 using BookStore.Api.Entities;
 using BookStore.Api.Repositories;
@@ -42,7 +43,8 @@ public static class AuthorEndpoints
 
             await authorRepository.UpdateAsync(existingAuthor);
             return Results.NoContent();
-        });
+        })
+        .RequireAuthorization(Policies.AdminAccess);
         authorsGroup.MapDelete("/{id}", async (IAuthorRepository authorRepository, int id) =>
         {
             Author? author = await authorRepository.GetAsync(id);
@@ -53,7 +55,8 @@ public static class AuthorEndpoints
             }
 
             return Results.NoContent();
-        });
+        })
+        .RequireAuthorization(Policies.AdminAccess);
         return authorsGroup;
     }
 }

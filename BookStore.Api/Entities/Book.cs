@@ -37,4 +37,6 @@ public class Book
     [StringLength(250)]
     [Column("image_uri")]
     public required string ImageUri { get; set; }
+    [Column("date_added")]
+    public DateTime DateAdded { get; set; }
 }

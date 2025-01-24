@@ -18,7 +18,8 @@ public static class EntityExtensions
             book.PagesCount,
             book.Price,
             book.ReleaseDate,
-            book.ImageUri
+            book.ImageUri,
+            book.DateAdded
         );
     }
     public static BookDtoV2 AsDtoV2(this Book book) // convert book entity to book Dto
@@ -36,7 +37,8 @@ public static class EntityExtensions
             book.Price - (book.Price * .3m),
             book.Price,
             book.ReleaseDate,
-            book.ImageUri
+            book.ImageUri,
+            book.DateAdded
         );
     }
     public static ClientDto AsDto(this Client client) // convert book entity to book Dto

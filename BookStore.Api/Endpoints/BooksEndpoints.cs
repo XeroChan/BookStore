@@ -7,8 +7,8 @@ namespace BookStore.Api.Endpoints;
 
 public static class BooksEndpoints //all extension methods are static
 {
-    const string GetGameV1EndpointName = "GetGameV1";
-    const string GetGameV2EndpointName = "GetGameV2";
+    const string GetBookV1EndpointName = "GetBookV1";
+    const string GetBookV2EndpointName = "GetBookV2";
 
     public static RouteGroupBuilder MapBooksEndpoints(this IEndpointRouteBuilder routes) // do one more extension for that type just as MapGets etc
     {
@@ -31,7 +31,7 @@ public static class BooksEndpoints //all extension methods are static
 
             return book is not null ? Results.Ok(book.AsDtoV1()) : Results.NotFound();
         })
-        .WithName(GetGameV1EndpointName) // retrive game by id
+        .WithName(GetBookV1EndpointName) // retrive game by id
         .MapToApiVersion(1.0);
 
         // V2 GET ENDPOINTS
@@ -46,7 +46,7 @@ public static class BooksEndpoints //all extension methods are static
 
             return book is not null ? Results.Ok(book.AsDtoV2()) : Results.NotFound();
         })
-        .WithName(GetGameV2EndpointName) // retrive game by id
+        .WithName(GetBookV2EndpointName) // retrive game by id
         .MapToApiVersion(2.0);
 
         group.MapPost("/", async (IBooksRepository repository, CreateBookDto bookDto) =>
@@ -62,12 +62,13 @@ public static class BooksEndpoints //all extension methods are static
                 PagesCount = bookDto.PagesCount,
                 Price = bookDto.Price,
                 ReleaseDate = bookDto.ReleaseDate,
-                ImageUri = bookDto.ImageUri
+                ImageUri = bookDto.ImageUri,
+                DateAdded = bookDto.DateAdded
             };
 
             await repository.CreateAsync(book);
 
-            return Results.CreatedAtRoute(GetGameV1EndpointName, new { id = book.Id }, book);
+            return Results.CreatedAtRoute(GetBookV1EndpointName, new { id = book.Id }, book);
         })
         .RequireAuthorization(Policies.AdminAccess)
         .MapToApiVersion(1.0);
@@ -87,6 +88,7 @@ public static class BooksEndpoints //all extension methods are static
             existingBook.Price = updatedBookDto.Price;
             existingBook.ReleaseDate = updatedBookDto.ReleaseDate;
             existingBook.ImageUri = updatedBookDto.ImageUri;
+            existingBook.DateAdded = updatedBookDto.DateAdded;
 
             await repository.UpdateAsync(existingBook);
 

@@ -17,6 +17,17 @@ public static class SubscriptionEndpoints
             return subscription is not null ? Results.Ok(subscription) : Results.NotFound();
         })
         .WithName(GetSubscriptionEndpointName);
+        subscriptionsGroup.MapGet("/user/{userId}", async (ISubscriptionRepository subscriptionRepository, int userId) =>
+        {
+            var subscriptions = await subscriptionRepository.GetByUserIdAsync(userId);
+            return Results.Ok(subscriptions);
+        });
+
+        subscriptionsGroup.MapGet("/credential/{credentialId}/new-publications", async (ISubscriptionRepository subscriptionRepository, int credentialId) =>
+        {
+            var publications = await subscriptionRepository.GetNewPublicationsForCredentialAsync(credentialId);
+            return Results.Ok(publications);
+        });
         subscriptionsGroup.MapPost("", async (ISubscriptionRepository subscriptionRepository, Subscription subscription) =>
         {
             await subscriptionRepository.CreateAsync(subscription);
@@ -33,6 +44,11 @@ public static class SubscriptionEndpoints
             }
 
             return Results.NoContent();
+        });
+        subscriptionsGroup.MapGet("/credential/{credentialId}", async (ISubscriptionRepository subscriptionRepository, int credentialId) =>
+        {
+            var subscriptions = await subscriptionRepository.GetByUserIdAsync(credentialId);
+            return Results.Ok(subscriptions);
         });
         return subscriptionsGroup;
     }
