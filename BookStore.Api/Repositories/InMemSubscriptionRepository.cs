@@ -4,6 +4,7 @@ namespace BookStore.Api.Repositories;
 
 public class InMemSubscriptionRepository : ISubscriptionRepository
 {
+    private readonly List<Book> books = new List<Book>();
     private readonly List<Subscription> subscriptions = new()
     {
         new Subscription()
@@ -42,4 +43,21 @@ public class InMemSubscriptionRepository : ISubscriptionRepository
 
         await Task.CompletedTask;
     }
+    public async Task<IEnumerable<Subscription>> GetByUserIdAsync(int userId)
+    {
+        var userSubscriptions = subscriptions.Where(s => s.CredentialId == userId);
+        return await Task.FromResult(userSubscriptions);
+    }
+    public async Task<IEnumerable<Book>> GetNewPublicationsForUserAsync(int userId)
+    {
+        var authorIds = subscriptions.Where(s => s.CredentialId == userId).Select(s => s.AuthorId);
+        var newPublications = books.Where(b => authorIds.Contains(b.AuthorId) && b.DateAdded >= DateTime.UtcNow.AddDays(-30));
+        return await Task.FromResult(newPublications);
+    }
+    public async Task<IEnumerable<Book>> GetNewPublicationsForCredentialAsync(int credentialId)
+        {
+            var authorIds = subscriptions.Where(s => s.CredentialId == credentialId).Select(s => s.AuthorId);
+            var newPublications = books.Where(b => authorIds.Contains(b.AuthorId) && b.DateAdded >= DateTime.UtcNow.AddDays(-30));
+            return await Task.FromResult(newPublications);
+        }
 }
