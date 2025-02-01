@@ -28,6 +28,11 @@ public static class CommentEndpoints
 
             return Results.Ok(comments.Select(comment => comment.AsDto()));
         });
+        commentsGroup.MapGet("/withUsernames", async (ICommentRepository commentRepository) =>
+        {
+            var comments = await commentRepository.GetAllWithUsernamesAsync();
+            return Results.Ok(comments);
+        });
         commentsGroup.MapGet("/book/{bookId}", async (ICommentRepository commentRepository, int bookId) =>
         {
             var comments = await commentRepository.GetByBookIdAsync(bookId);

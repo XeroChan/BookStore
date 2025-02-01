@@ -1,4 +1,5 @@
 using BookStore.Api.Data;
+using BookStore.Api.Dtos;
 using BookStore.Api.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -51,5 +52,19 @@ public class EntityFrameworkCommentsRepository : ICommentRepository
     public async Task DeleteAsync(int id)
     {
         await dbContext.Comments.Where(comment => comment.Id == id).ExecuteDeleteAsync();
+    }
+
+    public async Task<IEnumerable<CommentWithUsernameDto>> GetAllWithUsernamesAsync()
+    {
+        return await dbContext.Comments
+            .Include(c => c.Credential)
+            .Select(c => new CommentWithUsernameDto(
+                c.Id,
+                c.BookId,
+                c.CredentialId,
+                c.CommentString,
+                c.Rating,
+                c.Credential != null ? c.Credential.Username : "Unknown User"))
+            .ToListAsync();
     }
 }

@@ -171,6 +171,16 @@ public record CommentDto
     [Required] int Rating
 );
 
+public record CommentWithUsernameDto
+(
+    int Id,
+    int BookId,
+    int CredentialId,
+    [Required][StringLength(250)] string CommentString,
+    [Required] int Rating,
+    string Username
+);
+
 public record CreateCommentDto
 (
     [Required][StringLength(250)] string CommentString,

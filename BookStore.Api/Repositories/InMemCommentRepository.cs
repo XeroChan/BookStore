@@ -1,3 +1,4 @@
+using BookStore.Api.Dtos;
 using BookStore.Api.Entities;
 
 namespace BookStore.Api.Repositories;
@@ -37,6 +38,19 @@ public class InMemCommentRepository : ICommentRepository
         comments.Add(comment);
 
         await Task.CompletedTask;
+    }
+    public Task<IEnumerable<CommentWithUsernameDto>> GetAllWithUsernamesAsync()
+    {
+        var commentsWithUsernames = comments.Select(c => new CommentWithUsernameDto(
+            c.Id,
+            c.BookId,
+            c.CredentialId,
+            c.CommentString,
+            c.Rating,
+            "MockUsername" // Mock username for in-memory repository
+        ));
+
+        return Task.FromResult(commentsWithUsernames);
     }
     public async Task UpdateAsync(Comment updatedComment)
     {
