@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace BookStore.Api.Migrations
+namespace BookStore.Api.Data.Migrations
 {
     [DbContext(typeof(BookStoreContext))]
-    [Migration("20250111164124_ChangedDateAdded")]
-    partial class ChangedDateAdded
+    [Migration("20250125123026_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

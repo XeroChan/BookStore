@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "D:\\BS\\BookStore\\BookStore.Api\\BookStore.Api.csproj": {}
+    "F:\\BookStore\\BookStore.Api\\BookStore.Api.csproj": {}
   },
   "projects": {
-    "D:\\BS\\BookStore\\BookStore.Api\\BookStore.Api.csproj": {
+    "F:\\BookStore\\BookStore.Api\\BookStore.Api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\BS\\BookStore\\BookStore.Api\\BookStore.Api.csproj",
+        "projectUniqueName": "F:\\BookStore\\BookStore.Api\\BookStore.Api.csproj",
         "projectName": "BookStore.Api",
-        "projectPath": "D:\\BS\\BookStore\\BookStore.Api\\BookStore.Api.csproj",
-        "packagesPath": "C:\\Users\\Maciej\\.nuget\\packages\\",
-        "outputPath": "D:\\BS\\BookStore\\BookStore.Api\\obj\\",
+        "projectPath": "F:\\BookStore\\BookStore.Api\\BookStore.Api.csproj",
+        "packagesPath": "C:\\Users\\agent\\.nuget\\packages\\",
+        "outputPath": "F:\\BookStore\\BookStore.Api\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Maciej\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\agent\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net7.0"
@@ -32,11 +32,6 @@
           "warnAsError": [
             "NU1605"
           ]
-        },
-        "restoreAuditProperties": {
-          "enableAudit": "true",
-          "auditLevel": "low",
-          "auditMode": "direct"
         }
       },
       "frameworks": {
@@ -97,7 +92,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.404\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.410\\RuntimeIdentifierGraph.json"
         }
       }
     }
