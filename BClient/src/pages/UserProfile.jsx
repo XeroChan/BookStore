@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { fetchUserComments, fetchBookDetails } from '../api/data'; // Adjust the import according to your project structure
+import { fetchUserComments, fetchBookDetails, deleteComment } from '../api/data';
 import { Button } from '@mui/material';
 
 export const UserProfile = () =>
@@ -43,6 +43,31 @@ export const UserProfile = () =>
         navigate('/store');
     };
 
+    const handleDeleteComment = async (commentId) => {
+        await deleteComment(commentId);
+        // Refresh comments
+        if (user?.clientId)
+            {
+                fetchUserComments(user.clientId, async (comments) =>
+                {
+                    setComments(comments);
+                    const titles = {};
+                    for (const comment of comments)
+                    {
+                        const bookDetails = await fetchBookDetails(comment.bookId);
+                        if (bookDetails)
+                        {
+                            titles[comment.bookId] = bookDetails.title;
+                        }
+                    }
+                    setBookTitles(titles);
+                });
+            } else
+            {
+                console.error("User ID is undefined. Please login again.");
+            }
+      };
+
     return (
         <div>
             <h2>Profil użytkownika</h2>
@@ -60,7 +85,10 @@ export const UserProfile = () =>
             <ul>
                 {comments.map((comment) => (
                     <li key={comment.id}>
-                        <strong>{bookTitles[comment.bookId] || 'Loading...'}</strong>: {comment.commentString} (Ocena: {comment.rating}/5)
+                        <strong>{bookTitles[comment.bookId] || 'Loading...'}</strong>: {comment.commentString} Ocena: {comment.rating}/5
+                        <Button onClick={() => handleDeleteComment(comment.id)}>
+                            Usuń
+                        </Button>
                     </li>
                 ))}
             </ul>

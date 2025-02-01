@@ -9,7 +9,6 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
   MenuItem,
   Paper,
@@ -49,6 +48,7 @@ export const StorePage = () => {
   const [client, setClient] = useState([]);
   const [isAdmin, setIsAdmin] = useState([]);
   const [comments, setComments] = useState([]);
+  const [allComments, setAllComments] = useState([]);
   const [bookTitles, setBookTitles] = useState({});
   const [newComment, setNewComment] = useState("");
   const [newRating, setNewRating] = useState(0);
@@ -62,19 +62,30 @@ export const StorePage = () => {
   const [selectedSubscription, setSelectedSubscription] = useState(null);
   const [bookDetails, setBookDetails] = useState({
     title: "",
-    author: "",
+    author_id: 0,
     publisher: "",
     genre: "",
     description: "",
     isbn: "",
-    pagesCount: "",
-    price: "",
+    pagesCount: 0,
+    price: 0,
     releaseDate: "",
     imageUri: "",
+    dateAdded: new Date().toISOString(),
   });
   const [newPublications, setNewPublications] = useState([]);
   const [authors, setAuthors] = useState([]);
   const [subscriptions, setSubscriptions] = useState([]);
+  const [loggedInUserId, setLoggedInUserId] = useState("");
+
+  useEffect(() => {
+    const loadComments = async () => {
+      const commentsData = await api.fetchAllCommentsWithUsernames();
+      setAllComments(commentsData);
+      console.log("Comments:", commentsData); // Log the fetched comments
+    };
+    loadComments();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -161,7 +172,7 @@ export const StorePage = () => {
   const [updatedBook, setUpdatedBook] = useState({
     id: 0,
     title: "",
-    author: "",
+    author_id: "",
     publisher: "",
     genre: "",
     description: "",
@@ -232,6 +243,7 @@ export const StorePage = () => {
         newComment,
         newRating
       );
+      
       // Refresh comments
       api.fetchUserComments(user.clientId, async (comments) => {
         setComments(comments);
@@ -246,10 +258,17 @@ export const StorePage = () => {
         }
         setBookTitles(titles);
       });
+      // refresh all comments
+      const loadComments = async () => {
+        const commentsData = await api.fetchAllCommentsWithUsernames();
+        setAllComments(commentsData);
+        console.log("Comments:", commentsData); // Log the fetched comments
+      };
+      loadComments();
       setNewComment("");
       setNewRating(0);
       setSelectedBookId("");
-    }
+      }
   };
 
   const handleDeleteComment = async (commentId) => {
@@ -339,6 +358,12 @@ export const StorePage = () => {
   async function handleAddBook() {
     try {
       const token = localStorage.getItem("authToken");
+      const bookDetailsWithDate = {
+        ...bookDetails,
+        dateAdded: new Date().toISOString(), // Set current date and time before sending
+        
+      };
+      console.log('Book details before sending to backend:', bookDetailsWithDate); // Debugging line
       const response = await fetch("http://localhost:5088/books", {
         method: "POST",
         headers: {
@@ -352,7 +377,7 @@ export const StorePage = () => {
         api.fetchBooks(setBooks);
         setBookDetails({
           title: "",
-          author: "",
+          author_id: 0,
           publisher: "",
           genre: "",
           description: "",
@@ -361,6 +386,7 @@ export const StorePage = () => {
           price: 0,
           releaseDate: "",
           imageUri: "",
+          dateAdded: new Date().toISOString(), // Reset with current date and time
         });
         setShowAddBookForm(false);
       } else {
@@ -395,7 +421,7 @@ export const StorePage = () => {
         api.fetchBooks(setBooks);
         setUpdatedBook({
           title: "",
-          author: "",
+          author_id: 0,
           publisher: "",
           genre: "",
           description: "",
@@ -404,6 +430,7 @@ export const StorePage = () => {
           price: 0,
           releaseDate: "",
           imageUri: "",
+          dateAdded: new Date().toISOString(),
         });
       } else {
         console.error("Error editing the book:", response.statusText);
@@ -586,7 +613,12 @@ export const StorePage = () => {
       startIndex,
       startIndex + RentalsPerPage
     );
-
+    // Debug statements
+  console.log('rentalsToShow:', rentalsToShow);
+  console.log('getBookById:', getBookById);
+  console.log('client:', client);
+  console.log('formatDate:', formatDate);
+  console.log('authors:', authors);
     return (
       <div>
         <h2>Katalog</h2>
@@ -608,12 +640,13 @@ export const StorePage = () => {
         {/* Display the list of client rentals */}
         <div style={{ marginTop: "40px" }}>
           <h2>Twoje wypożyczenia</h2>
-
+          
           <ClientRentals
             rentalsToShow={rentalsToShow}
             getBookById={getBookById}
             client={client}
             formatDate={formatDate}
+            authors={authors}
           />
 
           {/* Render pagination controls */}
@@ -688,6 +721,7 @@ export const StorePage = () => {
             handleAddBook={handleAddBook}
             handleEditBook={handleEditBook}
             setShowAddBookForm={setShowAddBookForm}
+            authors={authors}
             theme={theme}
           />
         )}
@@ -703,7 +737,7 @@ export const StorePage = () => {
               setShowAddBookForm(true);
               setBookDetails({
                 title: "",
-                author: "",
+                author_id: 0,
                 publisher: "",
                 genre: "",
                 description: "",
@@ -712,6 +746,7 @@ export const StorePage = () => {
                 price: 0,
                 releaseDate: "",
                 imageUri: "",
+                dateAdded: new Date().toISOString(),
               });
             }}
             style={{ marginBottom: "10px" }}
@@ -786,6 +821,7 @@ export const StorePage = () => {
 
     return rentalsToShow.map((rental) => {
       const book = getBookById(rental.bookId);
+      const author = authors.find(author => author.id === book?.authorId);
       const client = getClients(rental.clientId);
 
       return (
@@ -794,7 +830,7 @@ export const StorePage = () => {
           <TableCell>{client?.surname || "N/A"}</TableCell>
           <TableCell>{client?.email || "N/A"}</TableCell>
           <TableCell>{book?.title || "N/A"}</TableCell>
-          <TableCell>{book?.author || "N/A"}</TableCell>
+          <TableCell>{author ? `${author.authorName} ${author.authorSurname}` : "N/A"}</TableCell>
           <TableCell>{formatDate(rental.rentalDate) || "N/A"}</TableCell>
           <TableCell>{formatDate(rental.dueDate) || "N/A"}</TableCell>
         </TableRow>
@@ -810,6 +846,7 @@ export const StorePage = () => {
     handleAddBook={handleAddBook}
     handleEditBook={handleEditBook}
     setShowAddBookForm={setShowAddBookForm}
+    authors={authors}
     theme={theme}
   />;
 
@@ -820,6 +857,7 @@ export const StorePage = () => {
           <LogoutTimer onTimeout={handleLogout} />
           {user && (
             <div style={{ marginLeft: "auto" }}>
+              <p>Witaj, {user.sub}!</p> {/* Display sub as username */}
               <Button
                 variant="contained"
                 color="secondary"
@@ -902,18 +940,15 @@ export const StorePage = () => {
               Dodaj Komentarz
             </Button>
 
-            <h3>Moje Komentarze</h3>
+            <h3>All Comments</h3>
             <ul>
-              {comments.map((comment) => (
-                <li key={comment.id}>
-                  <strong>{bookTitles[comment.bookId] || "Loading..."}</strong>:{" "}
-                  {comment.commentString} (Ocena: {comment.rating}/5)
-                  <Button onClick={() => handleDeleteComment(comment.id)}>
-                    Usuń
-                  </Button>
-                </li>
-              ))}
-            </ul>
+            {allComments.map((comment) => (
+              <li key={comment.Id}>
+                <strong>{comment.username}</strong> commented: {comment.commentString} on
+                <strong> {bookTitles[comment.bookId] || "Loading..."}</strong>{" "} scoring {comment.rating}/5
+              </li>
+            ))}
+          </ul>
           </div>
         )}
       </div>

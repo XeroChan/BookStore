@@ -318,3 +318,56 @@ export const fetchSubscriptionsForUser = async (credentialId) => {
     return [];
   }
 };
+const fetchAuthorById = async (authorId) => {
+  try {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      throw new Error("No auth token found");
+    }
+    const response = await fetch(
+      `http://localhost:5088/authors/${authorId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token.replace(/"/g, "")}`,
+        },
+      }
+    );
+    if (response.ok) {
+      const author = await response.json();
+      return {
+        name: author.name,
+        surname: author.surname,
+      };
+    } else {
+      throw new Error(`Failed to fetch author: ${response.statusText}`);
+    }
+  } catch (error) {
+    console.error("Error fetching author:", error);
+    return null;
+  }
+};
+
+export const fetchAllCommentsWithUsernames = async () => {
+  try {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      throw new Error("No auth token found");
+    }
+    const response = await fetch(`http://localhost:5088/comments/withUsernames`,
+      {
+        headers: {
+          Authorization: `Bearer ${token.replace(/"/g, "")}`,
+        },
+      }
+    );
+    if (response.ok) {
+      return await response.json();
+    } else {
+      console.error(`Failed to fetch comments: ${response.status}`);
+      return [];
+    }
+  } catch (error) {
+    console.error("Error fetching comments:", error);
+    return [];
+  }
+};

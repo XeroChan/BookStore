@@ -1,5 +1,5 @@
-import React from 'react';
-import { TextField, Button, ThemeProvider } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { TextField, Button, ThemeProvider, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 
 const BookForm = ({
     bookDetails,
@@ -9,6 +9,7 @@ const BookForm = ({
     handleAddBook,
     handleEditBook,
     setShowAddBookForm,
+    authors,
     theme
 }) =>
 {
@@ -20,8 +21,16 @@ const BookForm = ({
         }));
     };
 
+    const handleSelectChange = (e) => {
+        setBookDetails((prevState) => ({
+            ...prevState,
+            author_id: e.target.value,
+        }));
+    };
+    useEffect(() => {
+        console.log('Authors:', authors); // Debugging line to check authors data
+    }, [authors]);
     const maxTitleLength = 100;
-    const maxAuthorLength = 30;
     const maxPublisherLength = 40;
     const maxGenreLength = 50;
     const maxDescriptionLength = 800;
@@ -30,7 +39,7 @@ const BookForm = ({
     const maxPagesCount = 2000;
     const maxPrice = 200;
     const maxUriLength = 250;
-
+    console.log(authors);
     return (
         <ThemeProvider theme={theme}>
             <div>
@@ -46,17 +55,21 @@ const BookForm = ({
                         inputProps={{ maxLength: maxTitleLength }}
                         helperText={`Remaining characters: ${maxTitleLength - bookDetails.title.length}`}
                     />
-                    <TextField
-                        label="Autor"
-                        name="author"
-                        variant="outlined"
-                        fullWidth
-                        margin="normal"
-                        value={showAddBookForm ? bookDetails.author : ''}
-                        onChange={handleChange}
-                        inputProps={{ maxLength: maxAuthorLength }}
-                        helperText={`Remaining characters: ${maxAuthorLength - bookDetails.author.length}`}
-                    />
+                    <FormControl fullWidth margin="normal">
+                        <InputLabel id="author-label">Autor</InputLabel>
+                        <Select
+                            labelId="author-label"
+                            name="author_id"
+                            value={bookDetails.author_id || ''}
+                            onChange={handleSelectChange}
+                        >
+                            {authors.map(author => (
+                                <MenuItem key={author.id} value={author.id}>
+                                    {author.authorName} {author.authorSurname}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
                     <TextField
                         label="Publisher"
                         name="publisher"
@@ -185,22 +198,27 @@ const BookForm = ({
                     <Button
                         variant="contained"
                         color="primary"
-                        onClick={isEditing ? handleEditBook : handleAddBook}
-                        style={{ marginRight: '10px' }}
+                        onClick={() => {
+                            console.log('Book details before adding:', bookDetails); // Debugging line
+                            if (isEditing) {
+                                handleEditBook();
+                            } else {
+                                handleAddBook();
+                            }
+                        }}
                     >
-                        {isEditing ? 'Save Changes' : 'Dodaj książkę'}
+                        {isEditing ? 'Edytuj' : 'Dodaj'}
                     </Button>
 
                     <Button
-                        variant="outlined"
+                        variant="contained"
                         color="secondary"
-                        onClick={() =>
-                        {
+                        onClick={() => {
                             setShowAddBookForm(false);
                             setBookDetails({
                                 id: 0,
                                 title: '',
-                                author: '',
+                                author_id: '',
                                 publisher: '',
                                 genre: '',
                                 description: '',
@@ -209,6 +227,7 @@ const BookForm = ({
                                 price: 0,
                                 releaseDate: '',
                                 imageUri: '',
+                                dateAdded: new Date().toISOString(),
                             });
                         }}
                     >
