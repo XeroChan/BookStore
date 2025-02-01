@@ -26,14 +26,16 @@ docker ps - list containers
 docker stop mssql - stops the container
 
 ## Setting the connection string to secret manager
-### season 5 ep 6 time 00:41
 dotnet user-secrets init
 dotnet user-secrets list - check secrets
 ```powershell
 $sa_password = "Pass@word123"
 dotnet user-secrets set "ConnectionStrings:BookStoreContext" "Server=localhost; Database=BookStore; User Id=sa; Password=$sa_password; TrustServerCertificate=True"
 ```
-dotnet tool install --global dotnet-ef
+## Installing dotnet EntityFrameworkCore
+```powershell
+dotnet tool install --global dotnet-ef --version 7.0.5
+```
 dotnet add package Microsoft.EntityFrameworkCore.Design
 
 ## Migrations
@@ -62,4 +64,11 @@ dotnet user-jwts create --role "Admin"
 ## Merged scope and role
 ```powershell
 dotnet user-jwts create --role "Admin" --scope "store:write"
+```
+
+# Setup node js
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+npm install
+npm run dev
 ```
