@@ -13,7 +13,7 @@ public class Credential
     [StringLength(20)]
     public required string Username { get; set; }
     [Required]
-    [StringLength(20)]
+    [StringLength(100)]
     public required string Password { get; set; }
     [Column("is_admin")]
     public bool IsAdmin { get; set; }

@@ -117,6 +117,23 @@ public record UpdateCredentialDto
     bool IsAdmin
 );
 
+public record UserRegistrationDto
+(
+    [Required][StringLength(50)] string Name,
+    [Required][StringLength(50)] string Surname,
+    [Required][StringLength(100)][EmailAddress] string Email,
+    [Required][StringLength(9)][Phone] string Telephone,
+    [Required][StringLength(20)] string Username,
+    [Required][StringLength(20)] string Password,
+    bool IsAdmin
+);
+
+public record LoginDto
+(
+    [Required] string Username,
+    [Required] string Password
+);
+
 public record RentalDto
 (
     int Id,
