@@ -41,13 +41,16 @@ public class EntityFrameworkSubscriptionRepository : ISubscriptionRepository
 
     public async Task<IEnumerable<Book>> GetNewPublicationsForCredentialAsync(int credentialId)
     {
-        var authorIds = await dbContext.Subscriptions
+        var subscriptions = await dbContext.Subscriptions
             .Where(s => s.CredentialId == credentialId)
-            .Select(s => s.AuthorId)
             .ToListAsync();
 
+        var authorIds = subscriptions.Select(s => s.AuthorId).ToList();
+
+        var oneWeekAgo = DateTime.Now.AddDays(-7);
+
         return await dbContext.Books
-            .Where(b => authorIds.Contains(b.AuthorId) && b.DateAdded >= DateTime.UtcNow.AddDays(-30)) // Example: last 30 days
+            .Where(b => authorIds.Contains(b.AuthorId) && b.DateAdded >= oneWeekAgo)
             .ToListAsync();
     }
 }

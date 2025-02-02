@@ -56,4 +56,9 @@ public class InMemCredentialRepository : ICredentialRepository
 
         await Task.CompletedTask;
     }
+    public Task<Credential?> GetByClientIdAsync(int clientId)
+    {
+        var credential = credentials.FirstOrDefault(c => c.ClientId == clientId);
+        return Task.FromResult(credential);
+    }
 }
