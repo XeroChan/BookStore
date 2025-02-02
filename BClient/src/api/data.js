@@ -63,9 +63,64 @@ export async function fetchClients(setClients) {
   }
 }
 
+export const fetchNewPublicationsForSubscribedAuthors = async (credentialId) => {
+  try {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      throw new Error("No auth token found");
+    }
+    const response = await fetch(`http://localhost:5088/subscriptions/credential/${credentialId}/newPublications`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token.replace(/"/g, "")}`,
+        mode: "cors",
+        credentials: "include",
+      },
+    });
+    if (response.ok) {
+      return await response.json();
+    } else {
+      console.error(`Failed to fetch new publications: ${response.status}`);
+      return [];
+    }
+  } catch (error) {
+    console.error("Error fetching new publications:", error);
+    return [];
+  }
+};
+
+export const fetchCredentialIdByClientId = async (clientId) => {
+  try {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      throw new Error("No auth token found");
+    }
+    const response = await fetch(`http://localhost:5088/credentials/client/${clientId}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token.replace(/"/g, "")}`,
+        mode: "cors",
+        credentials: "include",
+      },
+    });
+    if (response.ok) {
+      return await response.json();
+    } else {
+      console.error(`Failed to fetch credential ID: ${response.status}`);
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching credential ID:", error);
+    return null;
+  }
+};
+
 export async function fetchRentals(setRentals) {
   try {
     const token = localStorage.getItem("authToken");
+    if (!token) {
+      throw new Error("No auth token found");
+    }
     const response = await fetch("http://localhost:5088/rentals", {
       headers: {
         "Content-Type": "application/json",
@@ -203,33 +258,6 @@ export const deleteComment = async (commentId) => {
   }
 };
 
-export const fetchNewPublicationsForUser = async (credentialId) => {
-  try {
-    const token = localStorage.getItem("authToken");
-    if (!token) {
-      throw new Error("No auth token found");
-    }
-    const response = await fetch(
-      `http://localhost:5088/subscriptions/credential/${credentialId}/new-publications`,
-      {
-        headers: {
-          Authorization: `Bearer ${token.replace(/"/g, "")}`,
-        },
-      }
-    );
-    if (response.ok) {
-      return await response.json();
-    } else {
-      throw new Error(
-        `Failed to fetch new publications: ${response.statusText}`
-      );
-    }
-  } catch (error) {
-    console.error("Error fetching new publications:", error);
-    return [];
-  }
-};
-
 export const fetchAuthors = async () => {
   try {
     const token = localStorage.getItem("authToken");
@@ -318,7 +346,7 @@ export const fetchSubscriptionsForUser = async (credentialId) => {
     return [];
   }
 };
-const fetchAuthorById = async (authorId) => {
+export const fetchAuthorById = async (authorId) => {
   try {
     const token = localStorage.getItem("authToken");
     if (!token) {
@@ -371,3 +399,4 @@ export const fetchAllCommentsWithUsernames = async () => {
     return [];
   }
 };
+
