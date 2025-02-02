@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "NE74DHYBsuV56TDAxu00JM884Lr1EDhONk9xbOgpw7L8DI+JC6AYnkwKL/DNuVc16VeNQM5wfrlqUhrZ8eJJdw==",
+  "dgSpecHash": "jZ95T4EZlbh1wXmi42+c6Vl3lyWELNeMhrU35nGJQlptI/a04VfwHdjtWpYjwg9bUuL10V472TS1LxrXqoiOyg==",
   "success": true,
   "projectFilePath": "F:\\BookStore\\BookStore.Api\\BookStore.Api.csproj",
   "expectedPackageFiles": [
@@ -8,6 +8,7 @@
     "C:\\Users\\agent\\.nuget\\packages\\asp.versioning.http\\7.0.0\\asp.versioning.http.7.0.0.nupkg.sha512",
     "C:\\Users\\agent\\.nuget\\packages\\azure.core\\1.24.0\\azure.core.1.24.0.nupkg.sha512",
     "C:\\Users\\agent\\.nuget\\packages\\azure.identity\\1.6.0\\azure.identity.1.6.0.nupkg.sha512",
+    "C:\\Users\\agent\\.nuget\\packages\\bcrypt.net-next\\4.0.3\\bcrypt.net-next.4.0.3.nupkg.sha512",
     "C:\\Users\\agent\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\agent\\.nuget\\packages\\jwt\\10.0.2\\jwt.10.0.2.nupkg.sha512",
     "C:\\Users\\agent\\.nuget\\packages\\jwt.extensions.aspnetcore\\10.1.1\\jwt.extensions.aspnetcore.10.1.1.nupkg.sha512",
