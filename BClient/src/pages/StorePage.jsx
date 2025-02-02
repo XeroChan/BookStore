@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   AppBar,
   Button,
   Card,
   CardContent,
   CardMedia,
+  Container,
   CardActions,
   Dialog,
   DialogActions,
@@ -37,13 +38,16 @@ import ClientRentals from "../components/ClientRentals";
 import BookForm from "../components/BookForm";
 import AuthorsTable from '../components/AuthorsTable';
 import ConfirmationDialog from '../components/ConfirmationDialog';
+import CommentsSection from "../components/CommentsSection";
+import BookCatalog from "../components/BookCatalog";
+import AdminSection from "../components/AdminSection";
+import ClientSection from "../components/ClientSection";
 
-export const StorePage = () => {
+export const StorePage = ({ isAuthenticated, user, setUser }) => {
   const navigate = useNavigate();
 
   const [books, setBooks] = useState([]);
   const [rentals, setRentals] = useState([]);
-  const [user, setUser] = useState(null);
   const [clients, setClients] = useState([]);
   const [client, setClient] = useState([]);
   const [isAdmin, setIsAdmin] = useState([]);
@@ -54,15 +58,15 @@ export const StorePage = () => {
   const [newRating, setNewRating] = useState(0);
   const [open, setOpen] = useState(false);
   const [reviews, setReviews] = useState([]);
-  const [selectedBookId, setSelectedBookId] = useState(null);
+  const [selectedBookId, setSelectedBookId] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [showAddBookForm, setShowAddBookForm] = useState(false);
-  const [editBook] = useState(null);
+  const [editBook] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
-  const [selectedSubscription, setSelectedSubscription] = useState(null);
+  const [selectedSubscription, setSelectedSubscription] = useState("");
   const [bookDetails, setBookDetails] = useState({
     title: "",
-    author_id: 0,
+    AuthorId: 0,
     publisher: "",
     genre: "",
     description: "",
@@ -76,41 +80,96 @@ export const StorePage = () => {
   const [newPublications, setNewPublications] = useState([]);
   const [authors, setAuthors] = useState([]);
   const [subscriptions, setSubscriptions] = useState([]);
-  const [loggedInUserId, setLoggedInUserId] = useState("");
+  const [credentialId, setCredentialId] = useState("");
+
+  const bookTitlesRef = useRef({});
 
   useEffect(() => {
-    const loadComments = async () => {
-      const commentsData = await api.fetchAllCommentsWithUsernames();
-      setAllComments(commentsData);
-      console.log("Comments:", commentsData); // Log the fetched comments
+    const fetchBooksAndTitles = async () => {
+      await api.fetchBooks(setBooks);
+      const titles = {};
+      books.forEach((book) => {
+        titles[book.id] = book.title;
+      });
+      bookTitlesRef.current = titles;
+      setBookTitles(titles);
     };
-    loadComments();
+    fetchBooksAndTitles();
   }, []);
 
   useEffect(() => {
     const fetchData = async () => {
+      const commentsData = await api.fetchAllCommentsWithUsernames();
+      setAllComments(commentsData);
+
+      const titles = { ...bookTitlesRef.current };
+      for (const comment of commentsData) {
+        if (!titles[comment.bookId]) {
+          const bookDetails = await api.fetchBookDetails(comment.bookId);
+          if (bookDetails) {
+            titles[comment.bookId] = bookDetails.title;
+          }
+        }
+      }
+      bookTitlesRef.current = titles;
+      setBookTitles(titles);
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+
       const authorsData = await api.fetchAuthors();
       setAuthors(authorsData);
       if (user) {
+        console.log("User clientId:", user.clientId);
         const subscriptionsData = await api.fetchSubscriptionsForUser(
           user.clientId
         );
         setSubscriptions(subscriptionsData);
+        const credentialId = await api.fetchCredentialIdByClientId(user.clientId);
+        console.log("Fetched CredentialId:", credentialId); // Debugging log
+        setCredentialId(credentialId);
       }
     };
-
     fetchData();
   }, [user]);
+
+  
+
+  const loadNewPublications = async () => {
+    if (credentialId) {
+      const newPublicationsData = await api.fetchNewPublicationsForSubscribedAuthors(credentialId);
+
+      const authorsData = await api.fetchAuthors();
+
+      const authorsMap = authorsData.reduce((map, author) => {
+        map[author.id] = `${author.authorName} ${author.authorSurname}`;
+        return map;
+      }, {});
+
+      const publicationsWithAuthors = newPublicationsData.map((publication) => ({
+        ...publication,
+        authorName: authorsMap[publication.authorId] || 'Unknown Author',
+      }));
+      setNewPublications(publicationsWithAuthors);
+    }
+  };
+
+  useEffect(() => {
+    loadNewPublications();
+  }, [credentialId]);
 
   const handleSubscribeToAuthor = async (authorId) => {
     if (user) {
       await api.subscribeToAuthor(user.clientId, authorId);
       // Refresh new publications
-      api.fetchNewPublicationsForUser(user.clientId).then(setNewPublications);
+      const newPublicationsData = await api.fetchNewPublicationsForSubscribedAuthors(credentialId);
+      setNewPublications(newPublicationsData);
+      loadNewPublications();
       // Refresh subscriptions
-      const subscriptionsData = await api.fetchSubscriptionsForUser(
-        user.clientId
-      );
+      const subscriptionsData = await api.fetchSubscriptionsForUser(user.clientId);
       setSubscriptions(subscriptionsData);
     } else {
       console.error("User is not logged in");
@@ -119,12 +178,12 @@ export const StorePage = () => {
 
   const handleUnsubscribeFromAuthor = async () => {
     if (selectedSubscription) {
-      console.log("Unsubscribing from author:", selectedSubscription);
       await api.unsubscribeFromAuthor(selectedSubscription);
       // Refresh subscriptions
       const subscriptionsData = await api.fetchSubscriptionsForUser(user.clientId);
       setSubscriptions(subscriptionsData);
       setOpenDialog(false);
+      loadNewPublications();
     }
   };
 
@@ -146,7 +205,7 @@ export const StorePage = () => {
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
-    setSelectedSubscription(null);
+    setSelectedSubscription("");
   };
 
   useEffect(() => {
@@ -172,7 +231,7 @@ export const StorePage = () => {
   const [updatedBook, setUpdatedBook] = useState({
     id: 0,
     title: "",
-    author_id: "",
+    AuthorId: "",
     publisher: "",
     genre: "",
     description: "",
@@ -204,21 +263,22 @@ export const StorePage = () => {
         }
         setBookTitles(titles);
       });
-      api.fetchNewPublicationsForUser(user.clientId).then(setNewPublications);
-      api.fetchAuthors().then(setAuthors);
     }
   }, [user]);
+  
+  useEffect(() => {
+    if (credentialId) {
+      api.fetchNewPublicationsForSubscribedAuthors(credentialId).then(setNewPublications);
+      api.fetchAuthors().then(setAuthors);
+    }
+  }, [credentialId]);
 
   useEffect(() => {
     // If user is an admin, fetch clients and set admin status
     if (user && user.role === "Admin") {
-      console.log(user);
-      console.log("User is an admin");
       setIsAdmin(true);
       api.fetchClients(setClients);
     } else {
-      console.log(user);
-      console.log("User is not an admin");
       setIsAdmin(false);
     }
   }, [user]); // Fetch clients only when user changes
@@ -262,7 +322,6 @@ export const StorePage = () => {
       const loadComments = async () => {
         const commentsData = await api.fetchAllCommentsWithUsernames();
         setAllComments(commentsData);
-        console.log("Comments:", commentsData); // Log the fetched comments
       };
       loadComments();
       setNewComment("");
@@ -345,7 +404,7 @@ export const StorePage = () => {
         setRentalSuccess(true);
         setTimeout(() => {
           api.fetchRentals(setRentals);
-          setSelectedBookId(null);
+          setSelectedBookId("");
         }, 2000);
       } else {
         console.error("Error renting the book:", response.statusText);
@@ -370,14 +429,14 @@ export const StorePage = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token.replace(/"/g, "")}`,
         },
-        body: JSON.stringify(bookDetails),
+        body: JSON.stringify(bookDetailsWithDate),
       });
 
       if (response.ok) {
         api.fetchBooks(setBooks);
         setBookDetails({
           title: "",
-          author_id: 0,
+          AuthorId: 0,
           publisher: "",
           genre: "",
           description: "",
@@ -402,47 +461,6 @@ export const StorePage = () => {
     }
   }
 
-  async function handleEditBook() {
-    try {
-      const token = localStorage.getItem("authToken");
-      const response = await fetch(
-        `http://localhost:5088/books/${selectedBookId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token.replace(/"/g, "")}`,
-          },
-          body: JSON.stringify(bookDetails),
-        }
-      );
-
-      if (response.ok) {
-        api.fetchBooks(setBooks);
-        setUpdatedBook({
-          title: "",
-          author_id: 0,
-          publisher: "",
-          genre: "",
-          description: "",
-          isbn: "",
-          pagesCount: 0,
-          price: 0,
-          releaseDate: "",
-          imageUri: "",
-          dateAdded: new Date().toISOString(),
-        });
-      } else {
-        console.error("Error editing the book:", response.statusText);
-      }
-    } catch (error) {
-      console.error("Error editing the book:", error);
-    }
-  }
-
-  function handleEditBookClick(book) {
-    setSelectedBookId(book.id);
-  }
 
   async function handleDeleteBook(bookId) {
     try {
@@ -518,74 +536,14 @@ export const StorePage = () => {
     // Clear the authentication token from localStorage
     localStorage.removeItem("authToken");
     // Set the user state to null
-    setUser(null);
+    setUser("");
     navigate("/");
   }
 
-  const BooksPerPage = 5; // Number of books to display per page
-  const RentalsPerPage = 4;
-  const [currentPage, setCurrentPage] = useState(1);
-  const [currentRPage, setCurrentRPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filteredBooks, setFilteredBooks] = useState([]);
 
-  useEffect(() => {
-    const filtered = books.filter((book) =>
-      book.title.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    setFilteredBooks(filtered);
-  }, [books, searchQuery]);
-
-  function renderBookCatalog() {
-    // Calculate index range for the current page
-    const startIndex = (currentPage - 1) * BooksPerPage;
-    const endIndex = startIndex + BooksPerPage;
-
-    // Slice the array of books to display only those for the current page
-    const booksToShow = filteredBooks.slice(startIndex, endIndex);
-
-    // Handle page change
-    const handlePageChange = (_event, newPage) => {
-      setCurrentPage(newPage);
-    };
-
-    // Handle search
-    const handleSearch = (searchQuery) => {
-      setSearchQuery(searchQuery);
-      setCurrentPage(1); // Reset current page to 1 after search
-    };
-
-    return (
-      <div>
-        <SearchBar setSearchQuery={handleSearch} />
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
-            gap: "10px",
-          }}
-        >
-          {booksToShow.map((book) => (
-            <BookCard
-              key={book.id}
-              book={book}
-              onRent={handleRentBook} // Przekazujemy funkcję do obsługi wypożyczenia
-            />
-          ))}
-        </div>
-        {/* Render pagination controls */}
-        <Stack spacing={2} style={{ marginTop: "5vh", textAlign: "center" }}>
-          <Pagination
-            count={Math.ceil(filteredBooks.length / BooksPerPage)}
-            page={currentPage}
-            onChange={handlePageChange}
-            variant="outlined"
-            color="primary"
-            style={{ marginLeft: "auto", marginRight: "auto" }} // Center pagination
-          />
-        </Stack>
-      </div>
-    );
+  function getClients(clientId) {
+    const client = clients.find((client) => client.id === clientId);
+    return client;
   }
 
   function getClients(clientId) {
@@ -593,225 +551,49 @@ export const StorePage = () => {
     return client;
   }
 
-  function renderClientSection() {
-    const handleRPageChange = (_event, newPage) => {
-      setCurrentRPage(newPage);
-    };
-    const filteredRentals = rentals.filter((rental) => {
-      const userClientId = user?.clientId ? parseInt(user.clientId, 10) : null;
-      return rental.clientId === userClientId;
-    });
+  const handleEditBook = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await fetch(`http://localhost:5088/books/${bookDetails.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token.replace(/"/g, "")}`,
+        },
+        body: JSON.stringify(bookDetails),
+      });
 
-    // Calculate total number of pages based on the filtered rentals
-    const totalPages = Math.ceil(filteredRentals.length / RentalsPerPage);
+      if (response.ok) {
+        api.fetchBooks(setBooks);
+        setShowAddBookForm(false);
+        setBookDetails({
+          title: "",
+          AuthorId: 0,
+          publisher: "",
+          genre: "",
+          description: "",
+          isbn: "",
+          pagesCount: 0,
+          price: 0,
+          releaseDate: "",
+          imageUri: "",
+          dateAdded: new Date().toISOString(),
+        });
+      } else {
+        console.error("Error editing the book:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error editing the book:", error);
+    }
+  };
 
-    // Calculate the starting index for the current page
-    const startIndex = (currentRPage - 1) * RentalsPerPage;
-
-    // Slice the array of filtered rentals to display only those for the current page
-    const rentalsToShow = filteredRentals.slice(
-      startIndex,
-      startIndex + RentalsPerPage
-    );
-    // Debug statements
-  console.log('rentalsToShow:', rentalsToShow);
-  console.log('getBookById:', getBookById);
-  console.log('client:', client);
-  console.log('formatDate:', formatDate);
-  console.log('authors:', authors);
-    return (
-      <div>
-        <h2>Katalog</h2>
-        {renderBookCatalog()}
-
-        {selectedBookId && (
-          <RentalDatePicker
-            dueDate={dueDate}
-            handleDueDateChange={handleDueDateChange}
-            handleBookRental={handleBookRental}
-          />
-        )}
-
-        <RentalSnackbar
-          rentalSuccess={rentalSuccess}
-          handleSnackbarClose={handleSnackbarClose}
-        />
-
-        {/* Display the list of client rentals */}
-        <div style={{ marginTop: "40px" }}>
-          <h2>Twoje wypożyczenia</h2>
-          
-          <ClientRentals
-            rentalsToShow={rentalsToShow}
-            getBookById={getBookById}
-            client={client}
-            formatDate={formatDate}
-            authors={authors}
-          />
-
-          {/* Render pagination controls */}
-          <Stack spacing={2} style={{ marginTop: "5vh", textAlign: "center" }}>
-            <Pagination
-              count={totalPages}
-              page={currentRPage}
-              onChange={handleRPageChange}
-              variant="outlined"
-              color="primary"
-              style={{ marginLeft: "auto", marginRight: "auto" }} // Center pagination
-            />
-          </Stack>
-        </div>
-      </div>
-    );
+  function handleEditBookClick(book) {
+    setSelectedBookId(book.id);
   }
 
-  function getClients(clientId) {
-    const client = clients.find((client) => client.id === clientId);
-    return client;
-  }
-
-  function renderAdminSection() {
-    const startIndex = (currentPage - 1) * BooksPerPage;
-    const endIndex = startIndex + BooksPerPage;
-    const booksToShow = filteredBooks.slice(startIndex, endIndex);
-
-    // Handle page change
-    const handlePageChange = (_event, newPage) => {
-      setCurrentPage(newPage);
-    };
-    const handleRPageChange = (_event, newPage) => {
-      setCurrentRPage(newPage);
-    };
-    return (
-      <div>
-        {/* Display existing clients and their rental details */}
-        <h3>Klienci i wypożyczenia</h3>
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Imię</TableCell>
-                <TableCell>Nazwisko</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell>Book Tytuł</TableCell>
-                <TableCell>Book Autor</TableCell>
-                <TableCell>Data wypożyczenie</TableCell>
-                <TableCell>Data oddania</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>{renderClientRentalsAdm()}</TableBody>
-          </Table>
-        </TableContainer>
-        <Stack spacing={2} style={{ marginTop: "5vh", textAlign: "center" }}>
-          <Pagination
-            count={Math.ceil(rentals.length / RentalsPerPage)}
-            page={currentRPage}
-            onChange={handleRPageChange}
-            variant="outlined"
-            color="primary"
-            style={{ marginLeft: "auto", marginRight: "auto" }} // Center pagination
-          />
-        </Stack>
-        {(showAddBookForm || editBook) && (
-          <BookForm
-            bookDetails={bookDetails}
-            setBookDetails={setBookDetails}
-            showAddBookForm={showAddBookForm}
-            isEditing={isEditing}
-            handleAddBook={handleAddBook}
-            handleEditBook={handleEditBook}
-            setShowAddBookForm={setShowAddBookForm}
-            authors={authors}
-            theme={theme}
-          />
-        )}
-
-        {/* Display Existing Books */}
-        <h3>Katalog</h3>
-        {/* Dodaj książkę Form */}
-        {!showAddBookForm && (
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => {
-              setShowAddBookForm(true);
-              setBookDetails({
-                title: "",
-                author_id: 0,
-                publisher: "",
-                genre: "",
-                description: "",
-                isbn: "",
-                pagesCount: 0,
-                price: 0,
-                releaseDate: "",
-                imageUri: "",
-                dateAdded: new Date().toISOString(),
-              });
-            }}
-            style={{ marginBottom: "10px" }}
-          >
-            Dodaj książkę
-          </Button>
-        )}
-        <SearchBar setSearchQuery={setSearchQuery} />
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
-            gap: "10px",
-          }}
-        >
-          {booksToShow.map((book) => (
-            <Card key={book.id} style={{ width: "250px" }}>
-              <CardMedia
-                component="img"
-                alt={book.title}
-                height="250"
-                image={book.imageUri}
-                style={{ objectFit: "cover", maxWidth: "100%" }}
-              />
-              <CardContent>
-                <Typography variant="h6">{book.title}</Typography>
-                <Typography variant="subtitle1" color="textSecondary">
-                  {book.author}
-                </Typography>
-                <Typography variant="body2">{book.price} zł</Typography>
-              </CardContent>
-              <CardActions
-                style={{ justifyContent: "center", marginTop: "10px" }}
-              >
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => handleEditBookClick(book)}
-                >
-                  Zmień
-                </Button>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  onClick={() => handleDeleteBook(book.id)}
-                >
-                  Delete
-                </Button>
-              </CardActions>
-            </Card>
-          ))}
-        </div>
-        <Stack spacing={2} style={{ marginTop: "5vh", textAlign: "center" }}>
-          <Pagination
-            count={Math.ceil(filteredBooks.length / BooksPerPage)}
-            page={currentPage}
-            onChange={handlePageChange}
-            variant="outlined"
-            color="primary"
-            style={{ marginLeft: "auto", marginRight: "auto" }} // Center pagination
-          />
-        </Stack>
-      </div>
-    );
-  }
+  const handleNavigateToUserProfile = () => {
+    navigate("/userpage", { state: { user } });
+  };
 
   function renderClientRentalsAdm() {
     const startIndex = (currentRPage - 1) * RentalsPerPage;
@@ -844,133 +626,86 @@ export const StorePage = () => {
     showAddBookForm={showAddBookForm}
     isEditing={isEditing}
     handleAddBook={handleAddBook}
-    handleEditBook={handleEditBook}
     setShowAddBookForm={setShowAddBookForm}
     authors={authors}
     theme={theme}
   />;
 
   return (
-    <div>
-      <AppBar position="static">
-        <Toolbar>
-          <LogoutTimer onTimeout={handleLogout} />
-          {user && (
-            <div style={{ marginLeft: "auto" }}>
-              <p>Witaj, {user.sub}!</p> {/* Display sub as username */}
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={handleLogout}
-              >
-                Wyloguj się
-              </Button>
+    <Container>
+      {user && (
+            <div style={{ marginLeft: "auto", fontSize: "1.5rem" }}>
+              <p>Witaj, {user.sub}!</p>
             </div>
           )}
-          <Button
-            color="inherit"
-            onClick={() => {
-              console.log("Navigating with user:", user); // Add this log
-              navigate("/userpage", { state: { user } });
-            }}
-          >
-            Moje Subskrypcje
-          </Button>
-        </Toolbar>
-      </AppBar>
 
-      {/* Main content */}
       <div>
         <h1>Księgarnia</h1>
-        {/* Display user information */}
         <h3>Nowe Publikacje Ulubionych Twórców</h3>
         <ul>
           {newPublications.map((publication) => (
             <li key={publication.id}>
-              <strong>{publication.title}</strong> by {publication.author}
+              <strong>{publication.title}</strong> by {publication.authorName}
             </li>
           ))}
         </ul>
-        {isAdmin ? renderAdminSection() : renderClientSection()}
+        {isAdmin ? (
+          <AdminSection
+            books={books}
+            handleEditBookClick={handleEditBookClick}
+            handleDeleteBook={handleDeleteBook}
+            showAddBookForm={showAddBookForm}
+            setShowAddBookForm={setShowAddBookForm}
+            bookDetails={bookDetails}
+            setBookDetails={setBookDetails}
+            handleAddBook={handleAddBook}
+            handleEditBook={handleEditBook}
+            authors={authors}
+            isEditing={isEditing}
+            rentals={rentals}
+            renderClientRentalsAdm={renderClientRentalsAdm}
+            theme={theme}
+          />
+        ) : (
+          <ClientSection
+            books={books}
+            rentals={rentals}
+            user={user}
+            dueDate={dueDate}
+            handleDueDateChange={handleDueDateChange}
+            handleBookRental={handleBookRental}
+            rentalSuccess={rentalSuccess}
+            handleSnackbarClose={handleSnackbarClose}
+            getBookById={getBookById}
+            client={client}
+            formatDate={formatDate}
+            authors={authors}
+            selectedBookId={selectedBookId}
+          />
+        )}
+        <h3>Katalog Książek</h3>
+        <BookCatalog books={books} />
         <h3>Lista Twórców</h3>
         <AuthorsTable
-        authors={authors}
-        getSubscriptionId={getSubscriptionId}
-        handleSubscribeToAuthor={handleSubscribeToAuthor}
-        handleOpenDialog={handleOpenDialog}
-      />
-      <ConfirmationDialog
-        open={openDialog}
-        handleClose={handleCloseDialog}
-        handleConfirm={handleUnsubscribeFromAuthor}
-      />
+          authors={authors}
+          getSubscriptionId={getSubscriptionId}
+          handleSubscribeToAuthor={handleSubscribeToAuthor}
+          handleOpenDialog={handleOpenDialog}
+        />
+        <ConfirmationDialog
+          open={openDialog}
+          handleClose={handleCloseDialog}
+          handleConfirm={handleUnsubscribeFromAuthor}
+        />
         {user && (
-          <div>
-            <h3>Dodaj Komentarz</h3>
-            <TextField
-              label="Komentarz"
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              fullWidth
-            />
-            <TextField
-              label="Ocena"
-              type="number"
-              value={newRating}
-              onChange={(e) => setNewRating(Number(e.target.value))}
-              inputProps={{ min: 0, max: 5 }}
-              fullWidth
-            />
-            <Select
-              value={selectedBookId}
-              onChange={(e) => setSelectedBookId(e.target.value)}
-              fullWidth
-            >
-              {books.map((book) => (
-                <MenuItem key={book.id} value={book.id}>
-                  {book.title}
-                </MenuItem>
-              ))}
-            </Select>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handlePostComment}
-            >
-              Dodaj Komentarz
-            </Button>
-
-            <h3>All Comments</h3>
-            <ul>
-            {allComments.map((comment) => (
-              <li key={comment.Id}>
-                <strong>{comment.username}</strong> commented: {comment.commentString} on
-                <strong> {bookTitles[comment.bookId] || "Loading..."}</strong>{" "} scoring {comment.rating}/5
-              </li>
-            ))}
-          </ul>
-          </div>
+          <CommentsSection
+            user={user}
+            books={books}
+            bookTitles={bookTitles}
+            setBookTitles={setBookTitles}
+          />
         )}
       </div>
-
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Recenzje</DialogTitle>
-        <DialogContent>
-          <ul>
-            {reviews.map((review) => (
-              <li key={review.id}>
-                <strong>{review.user}</strong>: {review.commentString} (Ocena:{" "}
-                {review.rating}/5)
-              </li>
-            ))}
-          </ul>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="primary">
-            Zamknij
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </div>
+    </Container>
   );
 };
