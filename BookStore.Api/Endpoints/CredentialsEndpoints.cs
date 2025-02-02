@@ -24,6 +24,12 @@ public static class CredentialsEndpoints
         })
         .WithName(GetCredentialsEndpointName);
 
+        credentialGroup.MapGet("/client/{clientId}", async (ICredentialRepository credentialRepository, int clientId) =>
+        {
+            var credential = await credentialRepository.GetByClientIdAsync(clientId);
+            return credential is not null ? Results.Ok(credential.Id) : Results.NotFound();
+        });
+
         credentialGroup.MapPost("/", async (ICredentialRepository repository, CreateCredentialDto credentialDto) =>
         {
             Credential credential = new()

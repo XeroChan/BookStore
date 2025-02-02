@@ -41,6 +41,11 @@ public class EntityFrameworkCredentialsRepository : ICredentialRepository
         return await dbContext.Credentials.AsNoTracking().ToListAsync();
     }
 
+    public async Task<Credential?> GetByClientIdAsync(int clientId)
+    {
+        return await dbContext.Credentials.FirstOrDefaultAsync(c => c.ClientId == clientId);
+    }
+
     public async Task UpdateAsync(Credential updatedCredential)
     {
         dbContext.Update(updatedCredential);

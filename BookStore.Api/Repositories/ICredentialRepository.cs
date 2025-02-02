@@ -9,5 +9,6 @@ namespace BookStore.Api.Repositories
         Task<Credential?> GetAsync(int id);
         Task<IEnumerable<Credential>> GetAllAsync();
         Task UpdateAsync(Credential updatedCredential);
+        Task<Credential?> GetByClientIdAsync(int clientId);
     }
 }
