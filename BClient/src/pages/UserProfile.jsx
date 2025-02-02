@@ -1,97 +1,98 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { fetchUserComments, fetchBookDetails, deleteComment } from '../api/data';
-import { Button } from '@mui/material';
+import { Button, Container, Typography, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { styled } from '@mui/system';
 
-export const UserProfile = () =>
-{
-    const { state } = useLocation(); // Odbieranie user ze state
-    const user = state?.user; // Pobieranie użytkownika
-    const [comments, setComments] = useState([]);
-    const [bookTitles, setBookTitles] = useState({});
-    const navigate = useNavigate();
+const CenteredContainer = styled(Container)({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  minHeight: '100vh',
+  textAlign: 'center',
+});
 
-    useEffect(() =>
-    {
-        console.log('State:', state); // Add this log
-        console.log('User:', user); // Add this log
+export const UserProfile = ({ user, setUser }) => {
+  const location = useLocation();
+  const [comments, setComments] = useState([]);
+  const [bookTitles, setBookTitles] = useState({});
+  const navigate = useNavigate();
 
-        if (user?.clientId)
-        {
-            fetchUserComments(user.clientId, async (comments) =>
-            {
-                setComments(comments);
-                const titles = {};
-                for (const comment of comments)
-                {
-                    const bookDetails = await fetchBookDetails(comment.bookId);
-                    if (bookDetails)
-                    {
-                        titles[comment.bookId] = bookDetails.title;
-                    }
-                }
-                setBookTitles(titles);
-            });
-        } else
-        {
-            console.error("User ID is undefined. Please login again.");
+  useEffect(() => {
+    console.log('State:', location.state);
+    console.log('User:', user);
+
+    if (user?.clientId) {
+      fetchUserComments(user.clientId, async (comments) => {
+        setComments(comments);
+        const titles = {};
+        for (const comment of comments) {
+          const bookDetails = await fetchBookDetails(comment.bookId);
+          if (bookDetails) {
+            titles[comment.bookId] = bookDetails.title;
+          }
         }
-    }, [user]);
+        setBookTitles(titles);
+      });
+    } else {
+      console.error("User ID is undefined. Please login again.");
+    }
+  }, [user]);
 
-    const handleBackToStore = () =>
-    {
-        navigate('/store');
-    };
+  const handleBackToStore = () => {
+    navigate('/store');
+  };
 
-    const handleDeleteComment = async (commentId) => {
-        await deleteComment(commentId);
-        // Refresh comments
-        if (user?.clientId)
-            {
-                fetchUserComments(user.clientId, async (comments) =>
-                {
-                    setComments(comments);
-                    const titles = {};
-                    for (const comment of comments)
-                    {
-                        const bookDetails = await fetchBookDetails(comment.bookId);
-                        if (bookDetails)
-                        {
-                            titles[comment.bookId] = bookDetails.title;
-                        }
-                    }
-                    setBookTitles(titles);
-                });
-            } else
-            {
-                console.error("User ID is undefined. Please login again.");
-            }
-      };
+  const handleDeleteComment = async (commentId) => {
+    await deleteComment(commentId);
+    if (user?.clientId) {
+      fetchUserComments(user.clientId, async (comments) => {
+        setComments(comments);
+        const titles = {};
+        for (const comment of comments) {
+          const bookDetails = await fetchBookDetails(comment.bookId);
+          if (bookDetails) {
+            titles[comment.bookId] = bookDetails.title;
+          }
+        }
+        setBookTitles(titles);
+      });
+    } else {
+      console.error("User ID is undefined. Please login again.");
+    }
+  };
 
-    return (
-        <div>
-            <h2>Profil użytkownika</h2>
-            {user ? (
-                <p>Witaj, {user.sub}!</p> // Display sub as username
-            ) : (
-                <p>Nie znaleziono użytkownika. Proszę zalogować się ponownie.</p>
-            )}
+  return (
+    <CenteredContainer>
+      <Typography variant="h4" gutterBottom>
+        Profil użytkownika
+      </Typography>
+      {user ? (
+        <Typography variant="h6">Witaj, {user.sub}!</Typography>
+      ) : (
+        <Typography variant="h6">Nie znaleziono użytkownika. Proszę zalogować się ponownie.</Typography>
+      )}
 
-            <Button variant="contained" color="primary" onClick={handleBackToStore}>
-                Back to Store
-            </Button>
-
-            <h3>Moje Komentarze</h3>
-            <ul>
-                {comments.map((comment) => (
-                    <li key={comment.id}>
-                        <strong>{bookTitles[comment.bookId] || 'Loading...'}</strong>: {comment.commentString} Ocena: {comment.rating}/5
-                        <Button onClick={() => handleDeleteComment(comment.id)}>
-                            Usuń
-                        </Button>
-                    </li>
-                ))}
-            </ul>
-        </div>
-    );
+      <Typography variant="h5" gutterBottom>
+        Moje Komentarze
+      </Typography>
+      <List>
+        {comments.map((comment) => (
+          <ListItem key={comment.id}>
+            <ListItemText
+              primary={bookTitles[comment.bookId] || 'Loading...'}
+              secondary={`Ocena: ${comment.rating}/5 - ${comment.commentString}`}
+            />
+            <ListItemSecondaryAction>
+              <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteComment(comment.id)}>
+                <DeleteIcon />
+              </IconButton>
+            </ListItemSecondaryAction>
+          </ListItem>
+        ))}
+      </List>
+    </CenteredContainer>
+  );
 };
