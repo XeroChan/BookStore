@@ -23,7 +23,7 @@ public static class SubscriptionEndpoints
             return Results.Ok(subscriptions);
         });
 
-        subscriptionsGroup.MapGet("/credential/{credentialId}/new-publications", async (ISubscriptionRepository subscriptionRepository, int credentialId) =>
+        subscriptionsGroup.MapGet("/credential/{credentialId}/newPublications", async (ISubscriptionRepository subscriptionRepository, int credentialId) =>
         {
             var publications = await subscriptionRepository.GetNewPublicationsForCredentialAsync(credentialId);
             return Results.Ok(publications);
