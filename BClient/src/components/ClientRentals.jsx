@@ -33,9 +33,7 @@ const ClientRentals = ({
       <TableBody>
         {rentalsToShow.map((rental) => {
           const book = getBookById(rental.bookId);
-          console.log('Book:', book); // Debug statement
           const author = authors.find(author => author.id === book?.authorId);
-          console.log('Author:', author); // Debug statement
           return (
             <TableRow key={rental.id}>
               <TableCell>{book?.title || "N/A"}</TableCell>

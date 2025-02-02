@@ -10,11 +10,10 @@ const BookForm = ({
     handleEditBook,
     setShowAddBookForm,
     authors,
-    theme
-}) =>
-{
-    const handleChange = (e) =>
-    {
+    theme,
+    handleCancel
+}) => {
+    const handleChange = (e) => {
         setBookDetails((prevState) => ({
             ...prevState,
             [e.target.name]: e.target.value,
@@ -24,12 +23,14 @@ const BookForm = ({
     const handleSelectChange = (e) => {
         setBookDetails((prevState) => ({
             ...prevState,
-            author_id: e.target.value,
+            AuthorId: e.target.value,
         }));
     };
+
     useEffect(() => {
         console.log('Authors:', authors); // Debugging line to check authors data
     }, [authors]);
+
     const maxTitleLength = 100;
     const maxPublisherLength = 40;
     const maxGenreLength = 50;
@@ -39,7 +40,7 @@ const BookForm = ({
     const maxPagesCount = 2000;
     const maxPrice = 200;
     const maxUriLength = 250;
-    console.log(authors);
+
     return (
         <ThemeProvider theme={theme}>
             <div>
@@ -50,7 +51,7 @@ const BookForm = ({
                         variant="outlined"
                         fullWidth
                         margin="normal"
-                        value={showAddBookForm ? bookDetails.title : ''}
+                        value={bookDetails.title}
                         onChange={handleChange}
                         inputProps={{ maxLength: maxTitleLength }}
                         helperText={`Remaining characters: ${maxTitleLength - bookDetails.title.length}`}
@@ -59,8 +60,8 @@ const BookForm = ({
                         <InputLabel id="author-label">Autor</InputLabel>
                         <Select
                             labelId="author-label"
-                            name="author_id"
-                            value={bookDetails.author_id || ''}
+                            name="AuthorId"
+                            value={bookDetails.AuthorId || ''}
                             onChange={handleSelectChange}
                         >
                             {authors.map(author => (
@@ -76,7 +77,7 @@ const BookForm = ({
                         variant="outlined"
                         fullWidth
                         margin="normal"
-                        value={showAddBookForm ? bookDetails.publisher : ''}
+                        value={bookDetails.publisher}
                         onChange={handleChange}
                         inputProps={{ maxLength: maxPublisherLength }}
                         helperText={`Remaining characters: ${maxPublisherLength - bookDetails.publisher.length}`}
@@ -87,7 +88,7 @@ const BookForm = ({
                         variant="outlined"
                         fullWidth
                         margin="normal"
-                        value={showAddBookForm ? bookDetails.genre : ''}
+                        value={bookDetails.genre}
                         onChange={handleChange}
                         inputProps={{ maxLength: maxGenreLength }}
                         helperText={`Remaining characters: ${maxGenreLength - bookDetails.genre.length}`}
@@ -98,7 +99,7 @@ const BookForm = ({
                         variant="outlined"
                         fullWidth
                         margin="normal"
-                        value={showAddBookForm ? bookDetails.description : ''}
+                        value={bookDetails.description}
                         onChange={handleChange}
                         inputProps={{ maxLength: maxDescriptionLength }}
                         helperText={`Remaining characters: ${maxDescriptionLength - bookDetails.description.length}`}
@@ -110,9 +111,8 @@ const BookForm = ({
                         fullWidth
                         margin="normal"
                         type="text"
-                        value={showAddBookForm ? bookDetails.isbn : ''}
-                        onChange={(e) =>
-                        {
+                        value={bookDetails.isbn}
+                        onChange={(e) => {
                             setBookDetails((prevState) => ({
                                 ...prevState,
                                 [e.target.name]: e.target.value,
@@ -132,16 +132,14 @@ const BookForm = ({
                         fullWidth
                         margin="normal"
                         type="number"
-                        value={showAddBookForm ? bookDetails.pagesCount : ''}
-                        onChange={(e) =>
-                        {
+                        value={bookDetails.pagesCount}
+                        onChange={(e) => {
                             setBookDetails((prevState) => ({
                                 ...prevState,
                                 [e.target.name]: e.target.value,
                             }));
                             const value = parseInt(e.target.value, 10);
-                            if (!isNaN(value))
-                            {
+                            if (!isNaN(value)) {
                                 setBookDetails({ ...bookDetails, pagesCount: value });
                             }
                         }}
@@ -155,12 +153,10 @@ const BookForm = ({
                         fullWidth
                         margin="normal"
                         type="number"
-                        value={showAddBookForm ? bookDetails.price : ''}
-                        onChange={(e) =>
-                        {
+                        value={bookDetails.price}
+                        onChange={(e) => {
                             const value = parseFloat(e.target.value);
-                            if (!isNaN(value) && value <= maxPrice)
-                            {
+                            if (!isNaN(value) && value <= maxPrice) {
                                 setBookDetails((prevState) => ({
                                     ...prevState,
                                     [e.target.name]: value,
@@ -177,7 +173,7 @@ const BookForm = ({
                         fullWidth
                         margin="normal"
                         type="date"
-                        value={showAddBookForm ? bookDetails.releaseDate : ''}
+                        value={bookDetails.releaseDate}
                         onChange={handleChange}
                         InputLabelProps={{
                             shrink: true,
@@ -189,7 +185,7 @@ const BookForm = ({
                         variant="outlined"
                         fullWidth
                         margin="normal"
-                        value={showAddBookForm ? bookDetails.imageUri : ''}
+                        value={bookDetails.imageUri}
                         onChange={handleChange}
                         inputProps={{ maxLength: maxUriLength }}
                         helperText={`Remaining characters: ${maxUriLength - bookDetails.imageUri.length}`}
@@ -213,23 +209,7 @@ const BookForm = ({
                     <Button
                         variant="contained"
                         color="secondary"
-                        onClick={() => {
-                            setShowAddBookForm(false);
-                            setBookDetails({
-                                id: 0,
-                                title: '',
-                                author_id: '',
-                                publisher: '',
-                                genre: '',
-                                description: '',
-                                isbn: '',
-                                pagesCount: 0,
-                                price: 0,
-                                releaseDate: '',
-                                imageUri: '',
-                                dateAdded: new Date().toISOString(),
-                            });
-                        }}
+                        onClick={handleCancel}
                     >
                         Anuluj
                     </Button>
