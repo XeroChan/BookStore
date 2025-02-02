@@ -2,6 +2,7 @@ using BookStore.Api.Authorization;
 using BookStore.Api.Dtos;
 using BookStore.Api.Entities;
 using BookStore.Api.Repositories;
+using BCrypt.Net;
 
 namespace BookStore.Api.Endpoints;
 
@@ -14,6 +15,34 @@ public static class ClientsEndpoints
     {
 
         var clientGroup = routes.MapGroup("/clients").WithParameterValidation();
+
+        clientGroup.MapPost("/register", async (IClientRepository clientRepository, ICredentialRepository credentialRepository, UserRegistrationDto registrationDto) =>
+        {
+            // Create the client
+            Client client = new()
+            {
+                Name = registrationDto.Name,
+                Surname = registrationDto.Surname,
+                Email = registrationDto.Email,
+                Telephone = registrationDto.Telephone
+            };
+
+            await clientRepository.CreateAsync(client);
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(registrationDto.Password);
+            // Create the credential
+            Credential credential = new()
+            {
+                ClientId = client.Id,
+                Username = registrationDto.Username,
+                Password = hashedPassword, // Remember to hash the password before saving
+                IsAdmin = registrationDto.IsAdmin
+            };
+
+            await credentialRepository.CreateAsync(credential);
+
+            return Results.Created($"/clients/{client.Id}", client);
+        });
+
         clientGroup.MapGet("/", async (IClientRepository repository) =>
             (await repository.GetAllAsync()).Select(client => client.AsDto()));
 
