@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import useHistory from react-router-dom
+import { useNavigate } from "react-router-dom";
 import {
   Container,
   Typography,
@@ -17,6 +17,7 @@ const RegistrationContainer = styled(Container)({
   alignItems: "center",
   justifyContent: "center",
   height: "100vh",
+  textAlign: "center",
 });
 
 const RegistrationForm = styled("form")({
@@ -39,18 +40,14 @@ export const RegistrationPage = () => {
 
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
 
-  const navigate = useNavigate(); // Get the history object
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-  
-    // Jeśli pole to checkbox, obsłuż zmianę w sposób odpowiedni dla checkboxa
-    if (type === 'checkbox') {
-      setFormData((prevData) => ({ ...prevData, [name]: checked }));
-    } else {
-      // W innym przypadku, obsłuż zmianę w sposób standardowy
-      setFormData((prevData) => ({ ...prevData, [name]: value }));
-    }
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
   const handleRegistration = async (e) => {
@@ -67,66 +64,31 @@ export const RegistrationPage = () => {
     };
 
     try {
-      // Step 1: Create the client
-      const clientResponse = await fetch("http://localhost:5088/clients", {
+      const response = await fetch("http://localhost:5088/clients/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          name: registrationData.name,
-          surname: registrationData.surname,
-          email: registrationData.email,
-          telephone: registrationData.telephone,
-        }),
+        body: JSON.stringify(registrationData),
       });
 
-      const clientData = await clientResponse.json();
-
-      if (!clientResponse.ok) {
-        console.error("Błąd rejestracji klienta:", clientResponse.statusText);
-        console.error("Dodatkowe informacje:", clientData); // Log additional information
-        return;
+      if (response.ok) {
+        setRegistrationSuccess(true);
+        setTimeout(() => {
+          navigate("/");
+        }, 2000);
+      } else {
+        console.error("Błąd rejestracji użytkownika:", response.statusText);
       }
-
-      const clientId = clientData.id;
-
-      // Step 2: Create user credentials
-      const userRegistrationResponse = await fetch(
-        "http://localhost:5088/credentials",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            clientId: clientId,
-            username: registrationData.username,
-            password: registrationData.password,
-            isAdmin: registrationData.isAdmin,
-          }),
-        }
-      );
-
-      if (!userRegistrationResponse.ok) {
-        console.error(
-          "Błąd rejestracji użytkownika:",
-          userRegistrationResponse.statusText
-        );
-        return;
-      }
-      setRegistrationSuccess(true);
-      // Redirect after successful registration
-      setTimeout(() => {
-        navigate("/");
-      }, 2000); // Adjust the delay time as needed
     } catch (error) {
       console.error("Błąd podczas rejestracji:", error.message);
     }
   };
+
   const handleSnackbarClose = () => {
     setRegistrationSuccess(false);
   };
+
   return (
     <RegistrationContainer>
       <Typography variant="h4" gutterBottom>
@@ -141,6 +103,7 @@ export const RegistrationPage = () => {
           value={formData.name}
           onChange={handleChange}
           required
+          inputProps={{ maxLength: 50 }}
         />
         <TextField
           label="Nazwisko"
@@ -150,6 +113,7 @@ export const RegistrationPage = () => {
           value={formData.surname}
           onChange={handleChange}
           required
+          inputProps={{ maxLength: 50 }}
         />
         <TextField
           label="Email"
@@ -159,6 +123,7 @@ export const RegistrationPage = () => {
           value={formData.email}
           onChange={handleChange}
           required
+          inputProps={{ maxLength: 100 }}
         />
         <TextField
           label="Telefon"
@@ -168,6 +133,7 @@ export const RegistrationPage = () => {
           value={formData.telephone}
           onChange={handleChange}
           required
+          inputProps={{ maxLength: 9, pattern: "[0-9]{9}" }}
         />
         <TextField
           label="Nazwa użytkownika"
@@ -177,6 +143,7 @@ export const RegistrationPage = () => {
           value={formData.username}
           onChange={handleChange}
           required
+          inputProps={{ maxLength: 20 }}
         />
         <TextField
           label="Hasło"
@@ -186,6 +153,7 @@ export const RegistrationPage = () => {
           value={formData.password}
           onChange={handleChange}
           required
+          inputProps={{ maxLength: 20 }}
         />
         <FormControlLabel
           control={
@@ -201,13 +169,12 @@ export const RegistrationPage = () => {
           Zarejestruj się
         </Button>
       </RegistrationForm>
-      {/* Snackbar to display success message */}
       <Snackbar
         open={registrationSuccess}
         autoHideDuration={1800}
         onClose={handleSnackbarClose}
         message="Pomyślnie zarejestrowano. Zaloguj się."
-        anchorOrigin={{ vertical: "top", horizontal: "center" }} // Centered at the top
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       />
     </RegistrationContainer>
   );

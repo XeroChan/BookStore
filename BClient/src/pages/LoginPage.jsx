@@ -8,6 +8,7 @@ const LoginContainer = styled(Container)({
   alignItems: "center",
   justifyContent: "center",
   height: "100vh",
+  textAlign: "center",
 });
 
 const LoginForm = styled("form")({
@@ -17,19 +18,16 @@ const LoginForm = styled("form")({
   gap: "16px",
 });
 
-export const LoginPage = () =>
-{
+export const LoginPage = ({ setIsAuthenticated, setUser }) => {
   const navigate = useNavigate();
 
-  const handleLogin = async (event) =>
-  {
+  const handleLogin = async (event) => {
     event.preventDefault();
 
     const username = event.target.username.value;
     const password = event.target.password.value;
 
-    try
-    {
+    try {
       const response = await fetch('http://localhost:5088/login', {
         method: 'POST',
         headers: {
@@ -40,23 +38,16 @@ export const LoginPage = () =>
           password: password,
         }),
       });
-      console.log('Login response:', response);
-      if (response.ok)
-      {
+
+      if (response.ok) {
         const token = await response.text();
-
-        // Store the token in local storage
         localStorage.setItem('authToken', token);
-
-        // Redirect to a protected route or perform any other actions
+        setIsAuthenticated(true);
         navigate('/store');
-      } else
-      {
-        // Handle authentication failure (invalid credentials)
+      } else {
         console.error('Authentication failed');
       }
-    } catch (error)
-    {
+    } catch (error) {
       console.error('Error during login:', error);
     }
   };
@@ -83,9 +74,6 @@ export const LoginPage = () =>
         />
         <Button type="submit" variant="contained" color="primary">
           Zaloguj się
-        </Button>
-        <Button component={Link} to="/registration" variant="contained" color="primary">
-          Zarejestruj się
         </Button>
       </LoginForm>
     </LoginContainer>
