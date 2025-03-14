@@ -16,20 +16,19 @@ public static class AuthEndpoints
         {
             Console.WriteLine($"Attempting login for username: {loginDto.Username}");
 
-            var user = await db.Credentials
+            var credential = await db.Credentials
                 .Where(u => u.Username == loginDto.Username)
                 .FirstOrDefaultAsync();
 
-            if (user == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, user.Password))
+            if (credential == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, credential.Password))
             {
-                Console.WriteLine("Login failed. Invalid username or password.");
-                return Results.Unauthorized();
+                return Results.BadRequest(new { Message = "Invalid username or password." });
             }
             else
             {
-                Console.WriteLine($"Login successful for user: {user.Username}");
+                Console.WriteLine($"Login successful for user: {credential.Username}");
                 // Generate token
-                var token = CreateAccessToken(user, skey);
+                var token = CreateAccessToken(credential, skey);
                 Console.WriteLine($"Generated token: {token}");
                 return Results.Ok(token);
             }
@@ -62,15 +61,13 @@ public static class AuthEndpoints
             // Add role claims
             new Claim(ClaimTypes.Role, assignedRole), // Add the "Admin" role
             // Add client ID as a claim
-            new Claim("clientId", u.ClientId.ToString()), // Assuming u.ClientId is the client ID
-            // Add more claims as needed
+            new Claim("clientId", u.ClientId.ToString()),
         };
 
         // Add user scopes
         var userScopes = new List<string>
         {
             assignedScope
-            // Add more scopes as needed
         };
 
         // Set expiration time for the token
