@@ -1,6 +1,5 @@
 import React from 'react';
-import { Container, Typography, Button } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Container, Typography } from '@mui/material';
 import { styled } from '@mui/system';
 
 const CenteredContainer = styled(Container)({
@@ -8,7 +7,7 @@ const CenteredContainer = styled(Container)({
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
-  height: 'calc(100vh - 64px)', // Adjust height to account for AppBar
+  height: 'calc(100vh - 64px)',
   textAlign: 'center',
 });
 
