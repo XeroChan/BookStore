@@ -54,4 +54,9 @@ public class InMemRentalRepository : IRentalRepository
 
         await Task.CompletedTask;
     }
+    public async Task DeleteByClientIdAsync(int clientId)
+    {
+        rentals.RemoveAll(r => r.ClientId == clientId);
+        await Task.CompletedTask;
+    }
 }

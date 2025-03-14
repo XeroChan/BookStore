@@ -60,4 +60,9 @@ public class InMemSubscriptionRepository : ISubscriptionRepository
             var newPublications = books.Where(b => authorIds.Contains(b.AuthorId) && b.DateAdded >= DateTime.UtcNow.AddDays(-30));
             return await Task.FromResult(newPublications);
         }
+    public async Task DeleteByCredentialIdAsync(int credentialId)
+    {
+        subscriptions.RemoveAll(s => s.CredentialId == credentialId);
+        await Task.CompletedTask;
+    }
 }

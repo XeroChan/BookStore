@@ -77,4 +77,9 @@ public class InMemCommentRepository : ICommentRepository
         var bookComments = comments.Where(c => c.BookId == bookId);
         return Task.FromResult(bookComments.AsEnumerable());
     }
+    public async Task DeleteByCredentialIdAsync(int credentialId)
+    {
+        comments.RemoveAll(c => c.CredentialId == credentialId);
+        await Task.CompletedTask;
+    }
 }
