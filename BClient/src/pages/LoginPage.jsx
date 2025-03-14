@@ -18,7 +18,7 @@ const LoginForm = styled("form")({
   gap: "16px",
 });
 
-export const LoginPage = ({ setIsAuthenticated, setUser }) => {
+export const LoginPage = ({ setIsAuthenticated }) => {
   const navigate = useNavigate();
 
   const handleLogin = async (event) => {
@@ -28,29 +28,31 @@ export const LoginPage = ({ setIsAuthenticated, setUser }) => {
     const password = event.target.password.value;
 
     try {
-      const response = await fetch('http://localhost:5088/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: username,
-          password: password,
-        }),
-      });
+        const response = await fetch('http://localhost:5088/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                username: username,
+                password: password,
+            }),
+        });
 
-      if (response.ok) {
-        const token = await response.text();
-        localStorage.setItem('authToken', token);
-        setIsAuthenticated(true);
-        navigate('/store');
-      } else {
-        console.error('Authentication failed');
-      }
+        if (response.ok) {
+            const token = await response.text();
+            sessionStorage.setItem('authToken', token);
+            setIsAuthenticated(true);
+            navigate('/store');
+        } else {
+            const errorData = await response.json();
+            console.error('Login error:', errorData.message);
+            alert(errorData.message);
+        }
     } catch (error) {
-      console.error('Error during login:', error);
+        console.error('Login error:', error);
     }
-  };
+};
 
   return (
     <LoginContainer>
