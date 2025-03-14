@@ -19,5 +19,7 @@ public class Client
     [StringLength(9)]
     [Phone]
     public required string Telephone { get; set; }
+    [StringLength(500)]
+    public string? Description { get; set; }
 
 }
