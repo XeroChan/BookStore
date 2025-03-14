@@ -52,4 +52,10 @@ public class EntityFrameworkCredentialsRepository : ICredentialRepository
         await dbContext.SaveChangesAsync();
         logger.LogInformation("Successfully updated credential");
     }
+    public async Task<Credential?> GetByUsernameAsync(string username)
+    {
+        return await dbContext.Credentials
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Username == username);
+    }
 }

@@ -61,4 +61,8 @@ public class InMemCredentialRepository : ICredentialRepository
         var credential = credentials.FirstOrDefault(c => c.ClientId == clientId);
         return Task.FromResult(credential);
     }
+    public async Task<Credential?> GetByUsernameAsync(string username)
+    {
+        return await Task.FromResult(credentials.FirstOrDefault(c => c.Username == username));
+    }
 }

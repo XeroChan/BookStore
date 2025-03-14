@@ -9,5 +9,7 @@ namespace BookStore.Api.Repositories
         Task<Client?> GetAsync(int id);
         Task<IEnumerable<Client>> GetAllAsync();
         Task UpdateAsync(Client updatedClient);
+        Task<Client?> GetByEmailAsync(string email);
+        Task DeleteClientRelatedInfoAsync(int id);
     }
 }

@@ -52,4 +52,30 @@ public class EntityFrameworkClientsRepository : IClientRepository
         await dbContext.SaveChangesAsync();
         logger.LogInformation("Successfully updated client {Name} {Surname}. Email {Email}, Telephone {Telephone}", updatedClient.Name, updatedClient.Surname, updatedClient.Email, updatedClient.Telephone);
     }
+
+    public async Task<Client?> GetByEmailAsync(string email)
+    {
+        logger.LogInformation("Looking for client with email {email}", email);
+        return await dbContext.Clients.FirstOrDefaultAsync(client => client.Email == email);
+    }
+
+    public async Task DeleteClientRelatedInfoAsync(int clientId)
+    {
+        var credential = await dbContext.Credentials.FirstOrDefaultAsync(c => c.ClientId == clientId);
+        if (credential != null)
+        {
+            var rentals = await dbContext.Rentals.Where(r => r.ClientId == clientId).ToListAsync();
+            dbContext.Rentals.RemoveRange(rentals);
+
+            var comments = await dbContext.Comments.Where(c => c.CredentialId == credential.Id).ToListAsync();
+            dbContext.Comments.RemoveRange(comments);
+
+            var subscriptions = await dbContext.Subscriptions.Where(s => s.CredentialId == credential.Id).ToListAsync();
+            dbContext.Subscriptions.RemoveRange(subscriptions);
+
+            dbContext.Credentials.Remove(credential);
+        }
+
+        await dbContext.SaveChangesAsync();
+    }
 }
