@@ -1,35 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { TextField, Button, ThemeProvider, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 
 const BookForm = ({
     bookDetails,
     setBookDetails,
-    showAddBookForm,
     isEditing,
     handleAddBook,
     handleEditBook,
-    setShowAddBookForm,
     authors,
     theme,
     handleCancel
 }) => {
+    useEffect(() => {
+        if (isEditing && bookDetails) {
+            // Ensure releaseDate is in the correct format
+            if (bookDetails.releaseDate) {
+                const formattedDate = new Date(bookDetails.releaseDate).toISOString().split('T')[0];
+                setBookDetails((prevState) => ({
+                    ...prevState,
+                    releaseDate: formattedDate,
+                }));
+            }
+        }
+    }, [isEditing, bookDetails, setBookDetails]);
+
     const handleChange = (e) => {
+        const { name, value } = e.target;
         setBookDetails((prevState) => ({
             ...prevState,
-            [e.target.name]: e.target.value,
+            [name]: name === 'pagesCount' || name === 'price' ? Number(value) : value,
         }));
     };
 
     const handleSelectChange = (e) => {
         setBookDetails((prevState) => ({
             ...prevState,
-            AuthorId: e.target.value,
+            authorId: e.target.value,
         }));
     };
-
-    useEffect(() => {
-        console.log('Authors:', authors); // Debugging line to check authors data
-    }, [authors]);
 
     const maxTitleLength = 100;
     const maxPublisherLength = 40;
@@ -41,12 +49,21 @@ const BookForm = ({
     const maxPrice = 200;
     const maxUriLength = 250;
 
+    const handleSubmit = () => {
+        if (isEditing) {
+            handleEditBook(bookDetails);
+        } else {
+            handleAddBook(bookDetails);
+        }
+        handleCancel();
+    };
+
     return (
         <ThemeProvider theme={theme}>
             <div>
                 <form>
                     <TextField
-                        label="Tytuł"
+                        label="Title"
                         name="title"
                         variant="outlined"
                         fullWidth
@@ -57,11 +74,11 @@ const BookForm = ({
                         helperText={`Remaining characters: ${maxTitleLength - bookDetails.title.length}`}
                     />
                     <FormControl fullWidth margin="normal">
-                        <InputLabel id="author-label">Autor</InputLabel>
+                        <InputLabel id="author-label">Author</InputLabel>
                         <Select
                             labelId="author-label"
-                            name="AuthorId"
-                            value={bookDetails.AuthorId || ''}
+                            name="authorId"
+                            value={bookDetails.authorId || ''}
                             onChange={handleSelectChange}
                         >
                             {authors.map(author => (
@@ -112,16 +129,7 @@ const BookForm = ({
                         margin="normal"
                         type="text"
                         value={bookDetails.isbn}
-                        onChange={(e) => {
-                            setBookDetails((prevState) => ({
-                                ...prevState,
-                                [e.target.name]: e.target.value,
-                            }));
-                            const inputValue = e.target.value;
-                            const numericValue = inputValue.replace(/[^0-9]/g, '');
-                            const limitedValue = numericValue.slice(0, 13);
-                            setBookDetails({ ...bookDetails, isbn: limitedValue });
-                        }}
+                        onChange={handleChange}
                         inputProps={{ maxLength: maxISBNLength }}
                         helperText={`Remaining characters: ${maxISBNLength - bookDetails.isbn.length}`}
                     />
@@ -133,38 +141,21 @@ const BookForm = ({
                         margin="normal"
                         type="number"
                         value={bookDetails.pagesCount}
-                        onChange={(e) => {
-                            setBookDetails((prevState) => ({
-                                ...prevState,
-                                [e.target.name]: e.target.value,
-                            }));
-                            const value = parseInt(e.target.value, 10);
-                            if (!isNaN(value)) {
-                                setBookDetails({ ...bookDetails, pagesCount: value });
-                            }
-                        }}
-                        inputProps={{ max: maxPagesCount, min: minPagesCount }}
-                        helperText={`Minimum Pages Count: ${minPagesCount}. Pages until limit: ${maxPagesCount - bookDetails.pagesCount}`}
+                        onChange={handleChange}
+                        inputProps={{ min: minPagesCount, max: maxPagesCount }}
+                        helperText={`Pages count should be between ${minPagesCount} and ${maxPagesCount}`}
                     />
                     <TextField
-                        label="Cena"
+                        label="Price"
                         name="price"
                         variant="outlined"
                         fullWidth
                         margin="normal"
                         type="number"
                         value={bookDetails.price}
-                        onChange={(e) => {
-                            const value = parseFloat(e.target.value);
-                            if (!isNaN(value) && value <= maxPrice) {
-                                setBookDetails((prevState) => ({
-                                    ...prevState,
-                                    [e.target.name]: value,
-                                }));
-                            }
-                        }}
+                        onChange={handleChange}
                         inputProps={{ max: maxPrice }}
-                        helperText={`Remaining value before reaching maximum price: ${maxPrice - bookDetails.price}`}
+                        helperText={`Price should be less than ${maxPrice}`}
                     />
                     <TextField
                         label="Release Date"
@@ -175,12 +166,10 @@ const BookForm = ({
                         type="date"
                         value={bookDetails.releaseDate}
                         onChange={handleChange}
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
+                        InputLabelProps={{ shrink: true }}
                     />
                     <TextField
-                        label="ImageUri"
+                        label="Image URI"
                         name="imageUri"
                         variant="outlined"
                         fullWidth
@@ -190,29 +179,14 @@ const BookForm = ({
                         inputProps={{ maxLength: maxUriLength }}
                         helperText={`Remaining characters: ${maxUriLength - bookDetails.imageUri.length}`}
                     />
-                    {/* Buttons */}
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={() => {
-                            console.log('Book details before adding:', bookDetails); // Debugging line
-                            if (isEditing) {
-                                handleEditBook();
-                            } else {
-                                handleAddBook();
-                            }
-                        }}
-                    >
-                        {isEditing ? 'Edytuj' : 'Dodaj'}
-                    </Button>
-
-                    <Button
-                        variant="contained"
-                        color="secondary"
-                        onClick={handleCancel}
-                    >
-                        Anuluj
-                    </Button>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
+                        <Button variant="contained" color="primary" onClick={handleSubmit}>
+                            {isEditing ? 'Edit Book' : 'Add Book'}
+                        </Button>
+                        <Button variant="contained" color="secondary" onClick={handleCancel}>
+                            Cancel
+                        </Button>
+                    </div>
                 </form>
             </div>
         </ThemeProvider>
