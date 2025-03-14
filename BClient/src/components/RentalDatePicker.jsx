@@ -1,5 +1,5 @@
 import { Button, TextField } from "@mui/material";
-const RentalDatePicker = ({ dueDate, handleDueDateChange, handleBookRental }) => (
+const RentalDatePicker = ({ dueDate, handleDueDateChange, handleBookRental, handleCancelRental }) => (
     <div
         style={{ marginTop: "20px", display: "flex", alignItems: "center" }}
     >
@@ -18,8 +18,12 @@ const RentalDatePicker = ({ dueDate, handleDueDateChange, handleBookRental }) =>
             variant="contained"
             color="primary"
             onClick={handleBookRental}
+            style={{ marginRight: "10px" }}
         >
             Wypożycz książkę
+        </Button>
+        <Button variant="contained" color="primary" onClick={handleCancelRental}>
+            Anuluj
         </Button>
     </div>
 );
