@@ -72,7 +72,8 @@ public record ClientDto
     string Name,
     string Surname,
     string Email,
-    string Telephone
+    string Telephone,
+    string Description
 );
 
 public record CreateClientDto
@@ -88,7 +89,18 @@ public record UpdateClientDto
     [Required][StringLength(50)] string Name,
     [Required][StringLength(50)] string Surname,
     [Required][StringLength(100)][EmailAddress] string Email,
-    [Required][StringLength(9)][Phone] string Telephone
+    [Required][StringLength(9)][Phone] string Telephone,
+    string? Description
+);
+
+public record ClientDescriptionDto
+(
+    string? Description
+);
+
+public record UpdateClientDescriptionDto
+(
+    string? Description
 );
 
 public record CredentialDto
