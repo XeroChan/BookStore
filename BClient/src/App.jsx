@@ -7,13 +7,14 @@ import { UserProfile } from './pages/UserProfile';
 import { HomePage } from './pages/HomePage';
 import { AppBar, Toolbar, Typography, Button, Container, Box } from '@mui/material';
 import { getUserInfo } from './api/data.js';
-import './App.css'; // Import the CSS file
+import LogoutTimer from './components/LogoutTimer';
+import './App.css';
 
 function App({ isAuthenticated, setIsAuthenticated, user, setUser }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
+    const token = sessionStorage.getItem('authToken');
     if (token) {
       setIsAuthenticated(true);
       getUserInfo(setUser);
@@ -21,43 +22,55 @@ function App({ isAuthenticated, setIsAuthenticated, user, setUser }) {
   }, [setIsAuthenticated, setUser]);
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken');
+    sessionStorage.removeItem('authToken');
     setIsAuthenticated(false);
     setUser(null);
     navigate('/');
+  };
+
+  const handleTimeout = () => {
+    handleLogout();
+    alert('Zostałeś wylogowany z powodu nieaktywności.');
   };
 
   return (
     <>
       <AppBar position="fixed">
         <Toolbar>
-          <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', position: 'relative' }}>
-            <Typography variant="h6" sx={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
+          {isAuthenticated && (
+            <Box sx={{ display: 'flex', alignItems: 'center', marginRight: 'auto' }}>
+              <LogoutTimer initialTime={180} onTimeout={handleTimeout} />
+            </Box>
+          )}
+          <Box sx={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
+            <Typography variant="h6">
               BookStore
             </Typography>
           </Box>
-          {isAuthenticated ? (
-            <>
-              <Button color="inherit" component={Link} to="/store">
-                Store
-              </Button>
-              <Button color="inherit" component={Link} to="/userpage" state={{ user }}>
-                My Profile
-              </Button>
-              <Button color="inherit" onClick={handleLogout}>
-                Logout
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button color="inherit" component={Link} to="/login">
-                Login
-              </Button>
-              <Button color="inherit" component={Link} to="/registration">
-                Register
-              </Button>
-            </>
-          )}
+          <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+            {isAuthenticated ? (
+              <>
+                <Button color="inherit" component={Link} to="/store">
+                  Wypożyczalnia
+                </Button>
+                <Button color="inherit" component={Link} to="/userpage" state={{ user }}>
+                  Mój profil
+                </Button>
+                <Button color="inherit" onClick={handleLogout}>
+                  Wyloguj się
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button color="inherit" component={Link} to="/login">
+                  Zaloguj się
+                </Button>
+                <Button color="inherit" component={Link} to="/registration">
+                  Zarejestruj się
+                </Button>
+              </>
+            )}
+          </Box>
         </Toolbar>
       </AppBar>
       <Toolbar /> {/* This is to offset the fixed AppBar */}
@@ -67,7 +80,8 @@ function App({ isAuthenticated, setIsAuthenticated, user, setUser }) {
           <Route path="/login" element={<LoginPage setIsAuthenticated={setIsAuthenticated} setUser={setUser} />} />
           <Route path="/registration" element={<RegistrationPage />} />
           <Route path="/store" element={<StorePage isAuthenticated={isAuthenticated} user={user} setUser={setUser} />} />
-          <Route path="/userpage" element={<UserProfile user={user} setUser={setUser} />} />
+          <Route path="/userpage" element={<UserProfile user={user} setUser={setUser} setIsAuthenticated={setIsAuthenticated} />} />
+          <Route path="/userprofile/:clientId" element={<UserProfile user={user} setUser={setUser} setIsAuthenticated={setIsAuthenticated} />} />
         </Routes>
       </Container>
     </>
