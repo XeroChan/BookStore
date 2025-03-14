@@ -8,6 +8,7 @@ import {
   Snackbar,
   FormControlLabel,
   Checkbox,
+  Alert,
 } from "@mui/material";
 import { styled } from "@mui/system";
 
@@ -39,6 +40,7 @@ export const RegistrationPage = () => {
   });
 
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const navigate = useNavigate();
 
@@ -75,18 +77,25 @@ export const RegistrationPage = () => {
       if (response.ok) {
         setRegistrationSuccess(true);
         setTimeout(() => {
-          navigate("/");
+          navigate("/login");
         }, 2000);
       } else {
-        console.error("Błąd rejestracji użytkownika:", response.statusText);
+        const errorData = await response.json();
+        console.error("Registration error:", errorData.message);
+        setErrorMessage(errorData.message);
       }
     } catch (error) {
-      console.error("Błąd podczas rejestracji:", error.message);
+      console.error("Registration error:", error.message);
+      setErrorMessage("An unexpected error occurred. Please try again later."); // generic error message
     }
   };
 
   const handleSnackbarClose = () => {
     setRegistrationSuccess(false);
+  };
+
+  const handleAlertClose = () => {
+    setErrorMessage("");
   };
 
   return (
@@ -176,6 +185,12 @@ export const RegistrationPage = () => {
         message="Pomyślnie zarejestrowano. Zaloguj się."
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       />
+      <br></br>
+      {errorMessage && (
+        <Alert severity="error" onClose={handleAlertClose}>
+          {errorMessage}
+        </Alert>
+      )}
     </RegistrationContainer>
   );
 };
