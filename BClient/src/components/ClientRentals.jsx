@@ -11,6 +11,7 @@ import {
 const ClientRentals = ({
   rentalsToShow,
   getBookById,
+  books,
   client,
   formatDate,
   authors,
@@ -32,7 +33,7 @@ const ClientRentals = ({
       </TableHead>
       <TableBody>
         {rentalsToShow.map((rental) => {
-          const book = getBookById(rental.bookId);
+          const book = getBookById(rental.bookId, books);
           const author = authors.find(author => author.id === book?.authorId);
           return (
             <TableRow key={rental.id}>
