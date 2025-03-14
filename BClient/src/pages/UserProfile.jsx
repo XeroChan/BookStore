@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { fetchUserComments, fetchBookDetails, deleteComment } from '../api/data';
-import { Button, Container, Typography, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton } from '@mui/material';
+import { useLocation, useParams } from 'react-router-dom';
+import { fetchUserComments, fetchBookDetails, deleteComment, updateClientDescription, fetchClientDescription, fetchCredentialByClientId } from '../api/data';
+import { Button, Container, TextField, Typography, Grid, IconButton, Card, CardContent, CardActions, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Pagination } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { styled } from '@mui/system';
+import DeleteAccount from '../components/DeleteAccount';
 
 const CenteredContainer = styled(Container)({
   display: 'flex',
@@ -14,85 +16,221 @@ const CenteredContainer = styled(Container)({
   textAlign: 'center',
 });
 
-export const UserProfile = ({ user, setUser }) => {
+const CommentCard = styled(Card)({
+  marginBottom: '1rem',
+  backgroundColor: '#ffffff',
+  width: '100%',
+  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+  padding: '1rem',
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'space-between',
+  height: '100%',
+});
+
+export const UserProfile = ({ user, setIsAuthenticated }) => {
   const location = useLocation();
+  const { clientId } = useParams();
   const [comments, setComments] = useState([]);
   const [bookTitles, setBookTitles] = useState({});
-  const navigate = useNavigate();
+  const [description, setDescription] = useState("");
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [profileUser, setProfileUser] = useState(null);
+  const [username, setUsername] = useState("Brak nazwy użytkownika");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [commentsPerPage] = useState(9);
+  const [selectedComment, setSelectedComment] = useState(null);
+
+  const isOwnProfile = !clientId || clientId === user?.clientId.toString();
+  const isAdmin = user?.role === "Admin";
 
   useEffect(() => {
-    console.log('State:', location.state);
-    console.log('User:', user);
+    const fetchData = async () => {
+      const id = clientId || user?.clientId;
 
-    if (user?.clientId) {
-      fetchUserComments(user.clientId, async (comments) => {
-        setComments(comments);
-        const titles = {};
-        for (const comment of comments) {
-          const bookDetails = await fetchBookDetails(comment.bookId);
-          if (bookDetails) {
-            titles[comment.bookId] = bookDetails.title;
+      if (id) {
+        try {
+          const desc = await fetchClientDescription(id);
+          setDescription(desc.description || "Brak opisu");
+
+          const cred = await fetchCredentialByClientId(id);
+          const username = cred?.username;
+          setUsername(username || "Brak nazwy użytkownika");
+
+          const comments = await fetchUserComments(id);
+          setComments(comments);
+          const titles = {};
+          for (const comment of comments) {
+            const bookDetails = await fetchBookDetails(comment.bookId);
+            if (bookDetails) {
+              titles[comment.bookId] = bookDetails.title;
+            }
           }
-        }
-        setBookTitles(titles);
-      });
-    } else {
-      console.error("User ID is undefined. Please login again.");
-    }
-  }, [user]);
+          setBookTitles(titles);
 
-  const handleBackToStore = () => {
-    navigate('/store');
+          if (clientId) {
+            setProfileUser(cred);
+          } else {
+            setProfileUser(user);
+          }
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+      }
+    };
+
+    fetchData();
+  }, [user, clientId]);
+
+  const handleDescriptionChange = (event) => {
+    setDescription(event.target.value);
+  };
+
+  const handleSave = async () => {
+    await updateClientDescription(user.clientId, description);
+    setIsEditingDescription(false);
+    // Fetch the updated description after saving
+    const updatedDescription = await fetchClientDescription(user.clientId);
+    setDescription(updatedDescription.description || "Brak opisu");
+  };
+
+  const handleEditDescription = () => {
+    if (description === "Brak opisu") {
+      setDescription("");
+    }
+    setIsEditingDescription(true);
   };
 
   const handleDeleteComment = async (commentId) => {
     await deleteComment(commentId);
     if (user?.clientId) {
-      fetchUserComments(user.clientId, async (comments) => {
-        setComments(comments);
-        const titles = {};
-        for (const comment of comments) {
-          const bookDetails = await fetchBookDetails(comment.bookId);
-          if (bookDetails) {
-            titles[comment.bookId] = bookDetails.title;
-          }
+      const comments = await fetchUserComments(user.clientId);
+      setComments(comments);
+      const titles = {};
+      for (const comment of comments) {
+        const bookDetails = await fetchBookDetails(comment.bookId);
+        if (bookDetails) {
+          titles[comment.bookId] = bookDetails.title;
         }
-        setBookTitles(titles);
-      });
+      }
+      setBookTitles(titles);
     } else {
       console.error("User ID is undefined. Please login again.");
     }
   };
 
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value);
+  };
+
+  const handleOpenComment = (comment) => {
+    setSelectedComment(comment);
+  };
+
+  const handleCloseComment = () => {
+    setSelectedComment(null);
+  };
+
+  const indexOfLastComment = currentPage * commentsPerPage;
+  const indexOfFirstComment = indexOfLastComment - commentsPerPage;
+  const currentComments = comments.slice(indexOfFirstComment, indexOfLastComment);
+
+  if (!profileUser) {
+    return <Typography variant="h6">Loading...</Typography>;
+  }
+
   return (
     <CenteredContainer>
       <Typography variant="h4" gutterBottom>
-        Profil użytkownika
+        Profil użytkownika {username}
       </Typography>
-      {user ? (
-        <Typography variant="h6">Witaj, {user.sub}!</Typography>
-      ) : (
-        <Typography variant="h6">Nie znaleziono użytkownika. Proszę zalogować się ponownie.</Typography>
+      {isOwnProfile && (
+        <>
+          <Typography variant="h6">Witaj, {user.sub}!</Typography>
+          {isEditingDescription ? (
+            <>
+              <TextField
+                label="Opis"
+                variant="outlined"
+                multiline
+                rows={4}
+                value={description}
+                onChange={handleDescriptionChange}
+                fullWidth
+                margin="normal"
+              />
+              <Button variant="contained" color="primary" onClick={handleSave}>
+                Zapisz
+              </Button>
+            </>
+          ) : (
+            <>
+              <Typography variant="body1" gutterBottom>
+                Opis: <br></br> {description}
+              </Typography>
+              <Button variant="contained" color="primary" onClick={handleEditDescription} startIcon={<EditIcon />}>
+                Edytuj
+              </Button>
+            </>
+          )}
+          {!isAdmin && <DeleteAccount clientId={user.clientId} setIsAuthenticated={setIsAuthenticated} />} {/* Show DeleteAccount component if user is not an admin */}
+        </>
+      )}
+
+      {!isOwnProfile && (
+        <Typography variant="body1" gutterBottom>
+          Opis: <br></br>{description}
+        </Typography>
       )}
 
       <Typography variant="h5" gutterBottom>
-        Moje Komentarze
+        Komentarze użytkownika {username}
       </Typography>
-      <List>
-        {comments.map((comment) => (
-          <ListItem key={comment.id}>
-            <ListItemText
-              primary={bookTitles[comment.bookId] || 'Loading...'}
-              secondary={`Ocena: ${comment.rating}/5 - ${comment.commentString}`}
-            />
-            <ListItemSecondaryAction>
-              <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteComment(comment.id)}>
-                <DeleteIcon />
-              </IconButton>
-            </ListItemSecondaryAction>
-          </ListItem>
+      <Grid container spacing={3}> {/* Adjust spacing here */}
+        {currentComments.map((comment) => (
+          <Grid item xs={12} sm={6} md={4} key={comment.id}>
+            <CommentCard>
+              <CardContent>
+                <Typography variant="h6">{bookTitles[comment.bookId] || 'Loading...'}</Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Ocena: {comment.rating}/5
+                </Typography>
+                <Typography variant="body1" noWrap>{comment.commentString}</Typography>
+              </CardContent>
+              <CardActions>
+                <Button size="small" color="primary" onClick={() => handleOpenComment(comment)}>
+                  Czytaj więcej
+                </Button>
+                {isOwnProfile && (
+                  <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteComment(comment.id)}>
+                    <DeleteIcon />
+                  </IconButton>
+                )}
+              </CardActions>
+            </CommentCard>
+          </Grid>
         ))}
-      </List>
+      </Grid>
+      <Pagination
+        count={Math.ceil(comments.length / commentsPerPage)}
+        page={currentPage}
+        onChange={handlePageChange}
+        color="primary"
+        style={{ marginTop: '1rem' }}
+      />
+      <Dialog open={Boolean(selectedComment)} onClose={handleCloseComment} maxWidth="md" fullWidth>
+        <DialogTitle>{selectedComment?.bookTitle}</DialogTitle>
+        <DialogContent dividers style={{ overflowY: 'auto' }}> {/* Ensure vertical scroll */}
+          <DialogContentText style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
+            {selectedComment?.commentString}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseComment} color="primary">
+            Zamknij
+          </Button>
+        </DialogActions>
+      </Dialog>
     </CenteredContainer>
   );
 };
