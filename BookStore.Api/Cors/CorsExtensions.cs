@@ -15,7 +15,7 @@ public static class CorsExtensions
                 corsBuilder.WithOrigins(allowedOrigin)
                     .AllowAnyHeader()
                     .AllowAnyMethod()
-                    .AllowCredentials(); // Add this line
+                    .AllowCredentials();
             });
         });
     }

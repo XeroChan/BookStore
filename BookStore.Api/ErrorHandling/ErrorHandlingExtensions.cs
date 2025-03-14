@@ -20,14 +20,6 @@ public static class ErrorHandlingExtensions
                 Environment.MachineName,
                 Activity.Current?.TraceId);
 
-            // Results.Problem(
-            //         title: "We made a mistake but we are working on it!",
-            //         statusCode: StatusCodes.Status500InternalServerError,
-            //         extensions: new Dictionary<string, object?>
-            //             {
-            //                 {"traceId", Activity.Current?.TraceId.ToString()}
-            //             }
-            // );
             var problem = new ProblemDetails
             {
                 Title = "We made a mistake but we are working on it!",

@@ -64,10 +64,10 @@ public class InMemBooksRepository : IBooksRepository
     }
     public async Task CreateAsync(Book book)
     {
-        book.Id = books.Max(book => book.Id) + 1; // dla całej listy gier zwracam identyfikatory istniejących już obiektów, biorę max i dodaje 1
+        book.Id = books.Max(book => book.Id) + 1; // catch max book id and increment
         books.Add(book);
 
-        await Task.CompletedTask; // nothing to wait for after its completre
+        await Task.CompletedTask; // nothing to wait for after its complete
     }
     public async Task UpdateAsync(Book updatedGame)
     {

@@ -41,7 +41,7 @@ public static class EntityExtensions
             book.DateAdded
         );
     }
-    public static ClientDto AsDto(this Client client) // convert book entity to book Dto
+    public static ClientDto AsDto(this Client client)
     {
         return new ClientDto
         (
@@ -49,10 +49,11 @@ public static class EntityExtensions
             client.Name,
             client.Surname,
             client.Email,
-            client.Telephone
+            client.Telephone,
+            client.Description ?? string.Empty
         );
     }
-    public static CredentialDto AsDto(this Credential credential) // convert book entity to book Dto
+    public static CredentialDto AsDto(this Credential credential)
     {
         return new CredentialDto
         (
@@ -63,7 +64,7 @@ public static class EntityExtensions
             credential.IsAdmin
         );
     }
-    public static RentalDto AsDto(this Rental rental) // convert book entity to book Dto
+    public static RentalDto AsDto(this Rental rental)
     {
         return new RentalDto
         (
@@ -74,7 +75,7 @@ public static class EntityExtensions
             rental.DueDate
         );
     }
-    public static AuthorDto AsDto(this Author author) // convert book entity to book Dto
+    public static AuthorDto AsDto(this Author author)
     {
         return new AuthorDto
         (
@@ -84,7 +85,7 @@ public static class EntityExtensions
             author.AuthorSurname
         );
     }
-    public static CommentDto AsDto(this Comment comment) // convert book entity to book Dto
+    public static CommentDto AsDto(this Comment comment)
     {
         return new CommentDto
         (

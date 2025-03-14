@@ -13,4 +13,5 @@ public interface ICommentRepository
     Task<IEnumerable<Comment>> GetByBookIdAsync(int userId);
     Task<IEnumerable<CommentWithUsernameDto>> GetAllWithUsernamesAsync();
     Task UpdateAsync(Comment updatedComment);
+
 }

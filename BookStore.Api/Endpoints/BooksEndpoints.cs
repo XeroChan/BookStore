@@ -10,7 +10,7 @@ public static class BooksEndpoints //all extension methods are static
     const string GetBookV1EndpointName = "GetBookV1";
     const string GetBookV2EndpointName = "GetBookV2";
 
-    public static RouteGroupBuilder MapBooksEndpoints(this IEndpointRouteBuilder routes) // do one more extension for that type just as MapGets etc
+    public static RouteGroupBuilder MapBooksEndpoints(this IEndpointRouteBuilder routes)
     {
 
         var group = routes.NewVersionedApi()
@@ -27,7 +27,7 @@ public static class BooksEndpoints //all extension methods are static
         group.MapGet("/{id}", async (IBooksRepository repository, int id) => // inject the repo as interface via dependency injection, books endpoints dont need to know the type of repo
         // just that theres an interface out there handling the connection with it
         {
-            Book? book = await repository.GetAsync(id); // returning ok not book??
+            Book? book = await repository.GetAsync(id);
 
             return book is not null ? Results.Ok(book.AsDtoV1()) : Results.NotFound();
         })
@@ -42,7 +42,7 @@ public static class BooksEndpoints //all extension methods are static
         group.MapGet("/{id}", async (IBooksRepository repository, int id) => // inject the repo as interface via dependency injection, books endpoints dont need to know the type of repo
         // just that theres an interface out there handling the connection with it
         {
-            Book? book = await repository.GetAsync(id); // returning ok not book??
+            Book? book = await repository.GetAsync(id);
 
             return book is not null ? Results.Ok(book.AsDtoV2()) : Results.NotFound();
         })
@@ -80,6 +80,7 @@ public static class BooksEndpoints //all extension methods are static
             if (existingBook is null) return Results.NotFound();
 
             existingBook.Title = updatedBookDto.Title;
+            existingBook.AuthorId = updatedBookDto.AuthorId;
             existingBook.Publisher = updatedBookDto.Publisher;
             existingBook.Genre = updatedBookDto.Genre;
             existingBook.Description = updatedBookDto.Description;

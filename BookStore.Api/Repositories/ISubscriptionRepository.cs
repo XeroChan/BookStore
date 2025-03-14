@@ -10,4 +10,5 @@ public interface ISubscriptionRepository
     Task<IEnumerable<Subscription>> GetAllAsync();
     Task<IEnumerable<Subscription>> GetByUserIdAsync(int userId);
     Task<IEnumerable<Book>> GetNewPublicationsForCredentialAsync(int credentialId);
+
 }

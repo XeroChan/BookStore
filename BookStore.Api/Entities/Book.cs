@@ -8,7 +8,7 @@ public class Book
     public int Id { get; set; }
     [Required] // server side validation, need a NuGet validator as well/ endpoint filter
     [StringLength(100)]
-    public required string Title { get; set; } // tell compiler that it can be declared in declaration or definition
+    public required string Title { get; set; }
     [Required]
     [Column("author_id")]
     public required int AuthorId { get; set; }

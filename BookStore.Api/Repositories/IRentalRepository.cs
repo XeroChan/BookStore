@@ -9,5 +9,6 @@ namespace BookStore.Api.Repositories
         Task<Rental?> GetAsync(int id);
         Task<IEnumerable<Rental>> GetAllAsync();
         Task UpdateAsync(Rental updatedRental);
+
     }
 }
