@@ -66,3 +66,14 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+@keyframes borderColorChange {
+  0% {
+    border-color: #3f51b5; /* First shade of blue */
+  }
+  50% {
+    border-color: #41a5fd; /* Second shade of blue */
+  }
+  100% {
+    border-color: #3f51b5; /* First shade of blue */
+  }
+}
