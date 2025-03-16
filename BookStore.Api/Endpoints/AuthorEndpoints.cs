@@ -19,16 +19,37 @@ public static class AuthorEndpoints
             return author is not null ? Results.Ok(author.AsDto()) : Results.NotFound();
         })
         .WithName(GetAuthorEndpointName);
-        authorsGroup.MapPost("/", async (IAuthorRepository authorRepository, CreateAuthorDto authorDto) =>
+        authorsGroup.MapPost("/", async (IAuthorRepository authorRepository, ICredentialRepository credentialRepository, IClientRepository clientRepository, CreateAuthorsDto authorsDto) =>
         {
-            Author author = new()
+            if (authorsDto.UserIds == null || !authorsDto.UserIds.Any())
             {
-                AuthorName = authorDto.AuthorName,
-                AuthorSurname = authorDto.AuthorSurname
-            };
-            await authorRepository.CreateAsync(author);
+                return Results.BadRequest("UserIds cannot be null or empty.");
+            }
 
-            return Results.CreatedAtRoute(GetAuthorEndpointName, new { id = author.Id }, author);
+            foreach (var userId in authorsDto.UserIds)
+            {
+                var credential = await credentialRepository.GetAsync(userId);
+                if (credential == null)
+                {
+                    return Results.BadRequest($"Credential with Id {userId} not found.");
+                }
+
+                var client = await clientRepository.GetAsync(credential.ClientId);
+                if (client == null)
+                {
+                    return Results.BadRequest($"Client with Id {credential.ClientId} not found.");
+                }
+
+                Author author = new()
+                {
+                    CredentialId = userId,
+                    AuthorName = client.Name,
+                    AuthorSurname = client.Surname
+                };
+                await authorRepository.CreateAsync(author);
+            }
+
+            return Results.Ok();
         });
         authorsGroup.MapPut("/{id}", async (IAuthorRepository authorRepository, int id, AuthorDto updatedAuthorDto) =>
         {
