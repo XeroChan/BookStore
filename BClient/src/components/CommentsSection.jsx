@@ -3,10 +3,13 @@ import {
   TextField,
   Button,
   IconButton,
-  Select,
   Stack,
   Pagination,
-  MenuItem,
+  Autocomplete,
+  Paper,
+  Popper,
+  FormControl,
+  FormHelperText,
 } from "@mui/material";
 import * as api from "../api/data";
 import { Link } from "react-router-dom";
@@ -30,6 +33,7 @@ const CommentsSection = ({
   const [editingComment, setEditingComment] = useState(null);
   const [editedCommentText, setEditedCommentText] = useState("");
   const [editedCommentRating, setEditedCommentRating] = useState(0);
+  const [errors, setErrors] = useState({});
 
   const fetchData = async () => {
     const commentsData = await api.fetchAllCommentsWithUsernames();
@@ -60,8 +64,17 @@ const CommentsSection = ({
   const endIndex = startIndex + commentsPerPage;
   const commentsToShow = allComments.slice(startIndex, endIndex);
 
+  const validateForm = () => {
+    const newErrors = {};
+    if (!newComment) newErrors.newComment = "Komentarz jest wymagany";
+    if (newRating < 0 || newRating > 5) newErrors.newRating = "Ocena musi być między 0 a 5";
+    if (!selectedBookId) newErrors.selectedBookId = "Wybierz książkę";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handlePostComment = async () => {
-    if (selectedBookId && newComment && newRating >= 0 && newRating <= 5) {
+    if (validateForm()) {
       await api.postComment(
         user.clientId,
         selectedBookId,
@@ -94,36 +107,75 @@ const CommentsSection = ({
     }
   };
 
+  const CustomPopper = (props) => {
+    return <Popper {...props} placement="bottom-start" />;
+  };
+
+  const CustomPaper = (props) => {
+    return <Paper {...props} style={{ maxHeight: 200, overflow: 'auto' }} />;
+  };
+
   return (
     <div>
       {!isAdmin && (
         <>
           <h3>Dodaj Komentarz</h3>
-          <TextField
-            label="Komentarz"
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            fullWidth
-          />
-          <TextField
-            label="Ocena"
-            type="number"
-            value={newRating}
-            onChange={(e) => setNewRating(Number(e.target.value))}
-            inputProps={{ min: 0, max: 5 }}
-            fullWidth
-          />
-          <Select
-            value={selectedBookId}
-            onChange={(e) => setSelectedBookId(e.target.value)}
-            fullWidth
-          >
-            {books.map((book) => (
-              <MenuItem key={book.id} value={book.id}>
-                {book.title}
-              </MenuItem>
-            ))}
-          </Select>
+          <FormControl fullWidth error={!!errors.newComment}>
+            <TextField
+              label="Komentarz"
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              fullWidth
+              required
+              InputLabelProps={{
+                sx: {
+                  color: "#9bc9db",
+                },
+              }}
+            />
+            {errors.newComment && <FormHelperText>{errors.newComment}</FormHelperText>}
+          </FormControl>
+          <FormControl fullWidth error={!!errors.newRating}>
+            <TextField
+              label="Ocena"
+              type="number"
+              value={newRating}
+              onChange={(e) => setNewRating(Math.min(Math.max(Number(e.target.value), 0), 5))}
+              inputProps={{ min: 0, max: 5 }}
+              fullWidth
+              required
+              InputLabelProps={{
+                sx: {
+                  color: "#9bc9db",
+                },
+              }}
+            />
+            {errors.newRating && <FormHelperText>{errors.newRating}</FormHelperText>}
+          </FormControl>
+          <FormControl fullWidth error={!!errors.selectedBookId}>
+            <Autocomplete
+              options={books.sort((a, b) => a.title.localeCompare(b.title))}
+              getOptionLabel={(option) => option.title}
+              value={books.find((book) => book.id === selectedBookId) || null}
+              onChange={(_event, newValue) => setSelectedBookId(newValue ? newValue.id : "")}
+              PopperComponent={CustomPopper}
+              PaperComponent={CustomPaper}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Wybierz książkę"
+                  fullWidth
+                  required
+                  InputLabelProps={{
+                    sx: {
+                      color: "#9bc9db",
+                    },
+                  }}
+                />
+              )}
+            />
+            {errors.selectedBookId && <FormHelperText>{errors.selectedBookId}</FormHelperText>}
+          </FormControl>
           <Button variant="contained" color="primary" onClick={handlePostComment}>
             Dodaj Komentarz
           </Button>
@@ -163,6 +215,11 @@ const CommentsSection = ({
             value={editedCommentText}
             onChange={(e) => setEditedCommentText(e.target.value)}
             fullWidth
+            InputLabelProps={{
+              sx: {
+                color: "#9bc9db",
+              },
+            }}
           />
           <TextField
             label="Ocena"
@@ -171,6 +228,11 @@ const CommentsSection = ({
             onChange={(e) => setEditedCommentRating(Number(e.target.value))}
             inputProps={{ min: 0, max: 5 }}
             fullWidth
+            InputLabelProps={{
+              sx: {
+                color: "#9bc9db",
+              },
+            }}
           />
           <Button
             variant="contained"
