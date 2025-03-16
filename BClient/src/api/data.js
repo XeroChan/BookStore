@@ -523,3 +523,47 @@ export async function updateClientDescription(clientId, description) {
     console.error("Error updating client description:", error);
   }
 }
+
+export const fetchUsersWithAuthorFlag = async () => {
+  try {
+    const token = sessionStorage.getItem("authToken");
+    if (!token) {
+      throw new Error("No auth token found");
+    }
+    const response = await fetch(`http://localhost:5088/credentials/withAuthorFlag`, {
+      headers: {
+        Authorization: `Bearer ${token.replace(/"/g, "")}`,
+      },
+    });
+    if (response.ok) {
+      return await response.json();
+    } else {
+      throw new Error(`Failed to fetch users: ${response.statusText}`);
+    }
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    return [];
+  }
+};
+
+export const addAuthors = async (userIds) => {
+  try {
+    const token = sessionStorage.getItem("authToken");
+    if (!token) {
+      throw new Error("No auth token found");
+    }
+    const response = await fetch(`http://localhost:5088/authors`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token.replace(/"/g, "")}`,
+      },
+      body: JSON.stringify({ userIds }),
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to add authors: ${response.statusText}`);
+    }
+  } catch (error) {
+    console.error("Error adding authors:", error);
+  }
+};
