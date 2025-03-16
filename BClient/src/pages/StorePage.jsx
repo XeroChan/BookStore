@@ -142,7 +142,6 @@ export const StorePage = ({ user, setUser }) => {
       )}
 
       <div>
-        <h1>Księgarnia</h1>
         {!isAdmin && (
           <>
             <h3>Nowe Publikacje Ulubionych Twórców</h3>
