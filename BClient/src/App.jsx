@@ -26,6 +26,7 @@ function App({ isAuthenticated, setIsAuthenticated, user, setUser }) {
     setIsAuthenticated(false);
     setUser(null);
     navigate('/');
+    window.location.reload();
   };
 
   const handleTimeout = () => {
@@ -50,22 +51,71 @@ function App({ isAuthenticated, setIsAuthenticated, user, setUser }) {
           <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
             {isAuthenticated ? (
               <>
-                <Button color="inherit" component={Link} to="/store">
+                <Button color="inherit" component={Link} to="/store"
+                sx={{
+                  fontWeight: 500,
+                  color: 'rgb(255, 255, 255)',
+                  textDecoration: 'inherit',
+                  '&:hover': {
+                    color: '#000000',
+                    backgroundColor: '#89c7fa',
+                  },
+                }}
+                >
                   Wypożyczalnia
                 </Button>
-                <Button color="inherit" component={Link} to="/userpage" state={{ user }}>
+                <Button color="inherit" component={Link} to="/userpage" state={{ user }}
+                sx={{
+                  fontWeight: 500,
+                  color: 'rgb(255, 255, 255)',
+                  textDecoration: 'inherit',
+                  '&:hover': {
+                    color: '#000000',
+                    backgroundColor: '#89c7fa',
+                  },
+                }}
+                >
                   Mój profil
                 </Button>
-                <Button color="inherit" onClick={handleLogout}>
+                <Button color="inherit" onClick={handleLogout}
+                sx={{
+                  fontWeight: 500,
+                  color: 'rgb(255, 255, 255)',
+                  textDecoration: 'inherit',
+                  '&:hover': {
+                    color: '#000000',
+                    backgroundColor: '#89c7fa',
+                  },
+                }}
+                >
                   Wyloguj się
                 </Button>
               </>
             ) : (
               <>
-                <Button color="inherit" component={Link} to="/login">
+                <Button color="inherit" component={Link} to="/login"
+                sx={{
+                  fontWeight: 500,
+                  color: 'rgb(255, 255, 255)',
+                  textDecoration: 'inherit',
+                  '&:hover': {
+                    color: '#000000',
+                    backgroundColor: '#89c7fa',
+                  },
+                }}>
                   Zaloguj się
                 </Button>
-                <Button color="inherit" component={Link} to="/registration">
+                <Button color="inherit" component={Link} to="/registration"
+                sx={{
+                  fontWeight: 500,
+                  color: 'rgb(255, 255, 255)',
+                  textDecoration: 'inherit',
+                  '&:hover': {
+                    color: '#000000',
+                    backgroundColor: '#89c7fa',
+                  },
+                }}
+                >
                   Zarejestruj się
                 </Button>
               </>
