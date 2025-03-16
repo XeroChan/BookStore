@@ -44,7 +44,6 @@ public static class ClientsEndpoints
                 ClientId = client.Id,
                 Username = registrationDto.Username,
                 Password = hashedPassword,
-                IsAdmin = registrationDto.IsAdmin
             };
 
             await credentialRepository.CreateAsync(credential);
