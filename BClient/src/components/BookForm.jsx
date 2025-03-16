@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { TextField, Button, ThemeProvider, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { TextField, Button, ThemeProvider, Autocomplete, Paper, Popper } from '@mui/material';
 
 const BookForm = ({
     bookDetails,
@@ -11,8 +11,12 @@ const BookForm = ({
     theme,
     handleCancel
 }) => {
+    const [isbnError, setIsbnError] = useState(false);
+    const [imageUriError, setImageUriError] = useState(false);
+    const [initialLoad, setInitialLoad] = useState(true);
+
     useEffect(() => {
-        if (isEditing && bookDetails) {
+        if (isEditing && bookDetails && initialLoad) {
             // Ensure releaseDate is in the correct format
             if (bookDetails.releaseDate) {
                 const formattedDate = new Date(bookDetails.releaseDate).toISOString().split('T')[0];
@@ -21,22 +25,58 @@ const BookForm = ({
                     releaseDate: formattedDate,
                 }));
             }
+            // Ensure AuthorId is set
+            if (bookDetails.authorId) {
+                setBookDetails((prevState) => ({
+                    ...prevState,
+                    AuthorId: bookDetails.authorId,
+                }));
+            }
+            setInitialLoad(false);
         }
-    }, [isEditing, bookDetails, setBookDetails]);
+    }, [isEditing, bookDetails, setBookDetails, initialLoad]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        let newValue = value;
+
+        if (name === 'pagesCount' || name === 'price') {
+            newValue = Number(value);
+            if (name === 'pagesCount' && newValue > maxPagesCount) {
+                newValue = maxPagesCount;
+            }
+            if (name === 'price' && newValue > maxPrice) {
+                newValue = maxPrice;
+            }
+        }
+
         setBookDetails((prevState) => ({
             ...prevState,
-            [name]: name === 'pagesCount' || name === 'price' ? Number(value) : value,
+            [name]: newValue,
         }));
     };
 
     const handleSelectChange = (e) => {
+        const AuthorId = parseInt(e.target.value, 10);
+        console.log("Selected Author ID:", AuthorId); // Debugging log
         setBookDetails((prevState) => ({
             ...prevState,
-            authorId: e.target.value,
+            AuthorId: AuthorId,
         }));
+    };
+
+    const handleKeyPress = (e) => {
+        const charCode = e.charCode;
+        if (charCode !== 58 && (charCode < 48 || charCode > 57)) {
+            e.preventDefault();
+        }
+    };
+
+    const handlePaste = (e) => {
+        const paste = (e.clipboardData || window.clipboardData).getData('text');
+        if (!/^\d+$/.test(paste)) {
+            e.preventDefault();
+        }
     };
 
     const maxTitleLength = 100;
@@ -49,13 +89,39 @@ const BookForm = ({
     const maxPrice = 200;
     const maxUriLength = 250;
 
+    const isValidImageUri = (uri) => {
+        const regex = /^(https?:\/\/).*\.(jpeg|jpg|gif|png|svg)$/i;
+        return regex.test(uri);
+    };
+
     const handleSubmit = () => {
+        console.log("Submitting Book Details:", bookDetails); // Debugging log
+        if (bookDetails.isbn.length !== 13) {
+            setIsbnError(true);
+            return;
+        }
+        setIsbnError(false);
+
+        if (!isValidImageUri(bookDetails.imageUri)) {
+            setImageUriError(true);
+            return;
+        }
+        setImageUriError(false);
+
         if (isEditing) {
             handleEditBook(bookDetails);
         } else {
             handleAddBook(bookDetails);
         }
         handleCancel();
+    };
+
+    const CustomPopper = (props) => {
+        return <Popper {...props} placement="bottom-start" />;
+    };
+
+    const CustomPaper = (props) => {
+        return <Paper {...props} style={{ maxHeight: 200, overflow: 'auto' }} />;
     };
 
     return (
@@ -71,23 +137,51 @@ const BookForm = ({
                         value={bookDetails.title}
                         onChange={handleChange}
                         inputProps={{ maxLength: maxTitleLength }}
-                        helperText={`Remaining characters: ${maxTitleLength - bookDetails.title.length}`}
+                        helperText={`Pozostałe znaki: ${maxTitleLength - bookDetails.title.length}`}
+                        required
+                        InputLabelProps={{
+                            sx: {
+                                color: "#9bc9db",
+                                "&:hover": {
+                                    color: "#89c7fa",
+                                },
+                            },
+                        }}
+                        InputProps={{
+                            sx: {
+                                color: "#ffffff",
+                                "&:hover .MuiOutlinedInput-notchedOutline": {
+                                    borderColor: "#89c7fa",
+                                },
+                            },
+                        }}
+                        FormHelperTextProps={{
+                            sx: {
+                                color: "#9bc9db",
+                            },
+                        }}
                     />
-                    <FormControl fullWidth margin="normal">
-                        <InputLabel id="author-label">Author</InputLabel>
-                        <Select
-                            labelId="author-label"
-                            name="authorId"
-                            value={bookDetails.authorId || ''}
-                            onChange={handleSelectChange}
-                        >
-                            {authors.map(author => (
-                                <MenuItem key={author.id} value={author.id}>
-                                    {author.authorName} {author.authorSurname}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
+                    <Autocomplete
+                        options={authors.sort((a, b) => a.authorName.localeCompare(b.authorName))}
+                        getOptionLabel={(option) => `${option.authorName} ${option.authorSurname}`}
+                        value={authors.find((author) => author.id === bookDetails.AuthorId) || null}
+                        onChange={handleSelectChange}
+                        PopperComponent={CustomPopper}
+                        PaperComponent={CustomPaper}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                label="Author"
+                                fullWidth
+                                required
+                                InputLabelProps={{
+                                    sx: {
+                                        color: "#9bc9db",
+                                    },
+                                }}
+                            />
+                        )}
+                    />
                     <TextField
                         label="Publisher"
                         name="publisher"
@@ -97,7 +191,29 @@ const BookForm = ({
                         value={bookDetails.publisher}
                         onChange={handleChange}
                         inputProps={{ maxLength: maxPublisherLength }}
-                        helperText={`Remaining characters: ${maxPublisherLength - bookDetails.publisher.length}`}
+                        helperText={`Pozostałe znaki: ${maxPublisherLength - bookDetails.publisher.length}`}
+                        required
+                        InputLabelProps={{
+                            sx: {
+                                color: "#9bc9db",
+                                "&:hover": {
+                                    color: "#89c7fa",
+                                },
+                            },
+                        }}
+                        InputProps={{
+                            sx: {
+                                color: "#ffffff",
+                                "&:hover .MuiOutlinedInput-notchedOutline": {
+                                    borderColor: "#89c7fa",
+                                },
+                            },
+                        }}
+                        FormHelperTextProps={{
+                            sx: {
+                                color: "#9bc9db",
+                            },
+                        }}
                     />
                     <TextField
                         label="Genre"
@@ -108,7 +224,29 @@ const BookForm = ({
                         value={bookDetails.genre}
                         onChange={handleChange}
                         inputProps={{ maxLength: maxGenreLength }}
-                        helperText={`Remaining characters: ${maxGenreLength - bookDetails.genre.length}`}
+                        helperText={`Pozostałe znaki: ${maxGenreLength - bookDetails.genre.length}`}
+                        required
+                        InputLabelProps={{
+                            sx: {
+                                color: "#9bc9db",
+                                "&:hover": {
+                                    color: "#89c7fa",
+                                },
+                            },
+                        }}
+                        InputProps={{
+                            sx: {
+                                color: "#ffffff",
+                                "&:hover .MuiOutlinedInput-notchedOutline": {
+                                    borderColor: "#89c7fa",
+                                },
+                            },
+                        }}
+                        FormHelperTextProps={{
+                            sx: {
+                                color: "#9bc9db",
+                            },
+                        }}
                     />
                     <TextField
                         label="Description"
@@ -119,7 +257,29 @@ const BookForm = ({
                         value={bookDetails.description}
                         onChange={handleChange}
                         inputProps={{ maxLength: maxDescriptionLength }}
-                        helperText={`Remaining characters: ${maxDescriptionLength - bookDetails.description.length}`}
+                        helperText={`Pozostałe znaki: ${maxDescriptionLength - bookDetails.description.length}`}
+                        required
+                        InputLabelProps={{
+                            sx: {
+                                color: "#9bc9db",
+                                "&:hover": {
+                                    color: "#89c7fa",
+                                },
+                            },
+                        }}
+                        InputProps={{
+                            sx: {
+                                color: "#ffffff",
+                                "&:hover .MuiOutlinedInput-notchedOutline": {
+                                    borderColor: "#89c7fa",
+                                },
+                            },
+                        }}
+                        FormHelperTextProps={{
+                            sx: {
+                                color: "#9bc9db",
+                            },
+                        }}
                     />
                     <TextField
                         label="ISBN"
@@ -130,8 +290,31 @@ const BookForm = ({
                         type="text"
                         value={bookDetails.isbn}
                         onChange={handleChange}
-                        inputProps={{ maxLength: maxISBNLength }}
-                        helperText={`Remaining characters: ${maxISBNLength - bookDetails.isbn.length}`}
+                        inputProps={{ minLength: 13, maxLength: 13, onKeyPress: handleKeyPress, onPaste: handlePaste }}
+                        helperText={isbnError ? "ISBN musi mieć 13 znaków" : `Pozostałe znaki: ${maxISBNLength - bookDetails.isbn.length}`}
+                        error={isbnError}
+                        required
+                        InputLabelProps={{
+                            sx: {
+                                color: "#9bc9db",
+                                "&:hover": {
+                                    color: "#89c7fa",
+                                },
+                            },
+                        }}
+                        InputProps={{
+                            sx: {
+                                color: "#ffffff",
+                                "&:hover .MuiOutlinedInput-notchedOutline": {
+                                    borderColor: "#89c7fa",
+                                },
+                            },
+                        }}
+                        FormHelperTextProps={{
+                            sx: {
+                                color: "#9bc9db",
+                            },
+                        }}
                     />
                     <TextField
                         label="Pages Count"
@@ -142,8 +325,30 @@ const BookForm = ({
                         type="number"
                         value={bookDetails.pagesCount}
                         onChange={handleChange}
-                        inputProps={{ min: minPagesCount, max: maxPagesCount }}
-                        helperText={`Pages count should be between ${minPagesCount} and ${maxPagesCount}`}
+                        inputProps={{ min: minPagesCount, max: maxPagesCount, onKeyPress: handleKeyPress, onPaste: handlePaste }}
+                        helperText={`Liczba stron powinna być między ${minPagesCount} i ${maxPagesCount}`}
+                        required
+                        InputLabelProps={{
+                            sx: {
+                                color: "#9bc9db",
+                                "&:hover": {
+                                    color: "#89c7fa",
+                                },
+                            },
+                        }}
+                        InputProps={{
+                            sx: {
+                                color: "#ffffff",
+                                "&:hover .MuiOutlinedInput-notchedOutline": {
+                                    borderColor: "#89c7fa",
+                                },
+                            },
+                        }}
+                        FormHelperTextProps={{
+                            sx: {
+                                color: "#9bc9db",
+                            },
+                        }}
                     />
                     <TextField
                         label="Price"
@@ -154,8 +359,30 @@ const BookForm = ({
                         type="number"
                         value={bookDetails.price}
                         onChange={handleChange}
-                        inputProps={{ max: maxPrice }}
-                        helperText={`Price should be less than ${maxPrice}`}
+                        inputProps={{ max: maxPrice, onKeyPress: handleKeyPress, onPaste: handlePaste }}
+                        helperText={`Cena powinna być mniejsza niż ${maxPrice}`}
+                        required
+                        InputLabelProps={{
+                            sx: {
+                                color: "#9bc9db",
+                                "&:hover": {
+                                    color: "#89c7fa",
+                                },
+                            },
+                        }}
+                        InputProps={{
+                            sx: {
+                                color: "#ffffff",
+                                "&:hover .MuiOutlinedInput-notchedOutline": {
+                                    borderColor: "#89c7fa",
+                                },
+                            },
+                        }}
+                        FormHelperTextProps={{
+                            sx: {
+                                color: "#9bc9db",
+                            },
+                        }}
                     />
                     <TextField
                         label="Release Date"
@@ -166,7 +393,29 @@ const BookForm = ({
                         type="date"
                         value={bookDetails.releaseDate}
                         onChange={handleChange}
-                        InputLabelProps={{ shrink: true }}
+                        required
+                        InputLabelProps={{
+                            shrink: true,
+                            sx: {
+                                color: "#9bc9db",
+                                "&:hover": {
+                                    color: "#89c7fa",
+                                },
+                            },
+                        }}
+                        InputProps={{
+                            sx: {
+                                color: "#ffffff",
+                                "&:hover .MuiOutlinedInput-notchedOutline": {
+                                    borderColor: "#89c7fa",
+                                },
+                            },
+                        }}
+                        FormHelperTextProps={{
+                            sx: {
+                                color: "#9bc9db",
+                            },
+                        }}
                     />
                     <TextField
                         label="Image URI"
@@ -177,14 +426,37 @@ const BookForm = ({
                         value={bookDetails.imageUri}
                         onChange={handleChange}
                         inputProps={{ maxLength: maxUriLength }}
-                        helperText={`Remaining characters: ${maxUriLength - bookDetails.imageUri.length}`}
+                        helperText={imageUriError ? "Nieprawidłowy URI obrazu" : `Pozostałe znaki: ${maxUriLength - bookDetails.imageUri.length}`}
+                        error={imageUriError}
+                        required
+                        InputLabelProps={{
+                            sx: {
+                                color: "#9bc9db",
+                                "&:hover": {
+                                    color: "#89c7fa",
+                                },
+                            },
+                        }}
+                        InputProps={{
+                            sx: {
+                                color: "#ffffff",
+                                "&:hover .MuiOutlinedInput-notchedOutline": {
+                                    borderColor: "#89c7fa",
+                                },
+                            },
+                        }}
+                        FormHelperTextProps={{
+                            sx: {
+                                color: "#9bc9db",
+                            },
+                        }}
                     />
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
                         <Button variant="contained" color="primary" onClick={handleSubmit}>
-                            {isEditing ? 'Edit Book' : 'Add Book'}
+                            {isEditing ? 'Edytuj' : 'Dodaj'}
                         </Button>
                         <Button variant="contained" color="secondary" onClick={handleCancel}>
-                            Cancel
+                            Anuluj
                         </Button>
                     </div>
                 </form>
