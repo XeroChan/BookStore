@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { styled } from '@mui/system';
+import { Alert, Button, TextField } from '@mui/material';
 
 const StyledInput = styled('input')({
   '::placeholder': {
-    color: '#dbdbdb', // Change this to your desired placeholder color#dbdbdb
+    color: '#dbdbdb', // Change this to your desired placeholder color
   },
 });
 
-const DeleteAccount = ({ clientId, setIsAuthenticated, IsAuthenticated }) => {
+const DeleteAccount = ({ clientId, setIsAuthenticated }) => {
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
   const handleDeleteAccount = async (e) => {
@@ -24,28 +26,58 @@ const DeleteAccount = ({ clientId, setIsAuthenticated, IsAuthenticated }) => {
         },
         body: JSON.stringify({ password }),
       });
-  
+
       if (response.ok) {
         sessionStorage.removeItem("authToken");
         setIsAuthenticated(false);
         navigate("/");
       } else {
-        console.error("Failed to delete account:", response.statusText);
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch (jsonError) {
+          errorData = { message: response.statusText };
+        }
+        setErrorMessage(errorData.message || "Failed to delete account.");
       }
     } catch (error) {
       console.error("Error deleting account:", error);
+      setErrorMessage("An unexpected error occurred. Please try again later.");
     }
+  };
+
+  const handleAlertClose = () => {
+    setErrorMessage("");
   };
 
   return (
     <div>
-      <StyledInput
+      <TextField
         type="password"
-        placeholder="Potwierdź hasło"
+        label="Potwierdź hasło"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        fullWidth
+        margin="normal"
+        InputLabelProps={{
+          sx: {
+            color: "#9bc9db",
+          },
+        }}
+        InputProps={{
+          sx: {
+            color: "#ffffff",
+          },
+        }}
       />
-      <button onClick={handleDeleteAccount}>Usuń konto</button>
+      <Button variant="contained" color="primary" onClick={handleDeleteAccount}>
+        Usuń konto
+      </Button>
+      {errorMessage && (
+        <Alert severity="error" onClose={handleAlertClose} sx={{ marginTop: '1rem' }}>
+          {errorMessage}
+        </Alert>
+      )}
     </div>
   );
 };

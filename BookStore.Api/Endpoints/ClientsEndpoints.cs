@@ -122,13 +122,13 @@ public static class ClientsEndpoints
             Client? client = await repository.GetAsync(id);
             if (client is null)
             {
-                return Results.NotFound();
+                return Results.NotFound(new { message = "Użytkownik nie został znaleziony." });
             }
 
             Credential? credential = await credentialRepository.GetByClientIdAsync(id);
             if (credential is null || credential.IsAdmin)
             {
-                return Results.Forbid();
+                return Results.Conflict(new { message = "Nie masz uprawnień do usunięcia tego użytkownika." });
             }
 
             // Read the password from the request body
@@ -137,13 +137,13 @@ public static class ClientsEndpoints
             var data = JsonSerializer.Deserialize<Dictionary<string, string>>(body);
             if (data == null || !data.TryGetValue("password", out var password))
             {
-                return Results.BadRequest("Password is required.");
+                return Results.BadRequest("Hasło jest wymagane.");
             }
 
             // Verify the password
             if (!BCrypt.Net.BCrypt.Verify(password, credential.Password))
             {
-                return Results.Forbid();
+                return Results.Conflict(new { message = "Hasło jest niepoprawne." });
             }
 
             // Delete related information
