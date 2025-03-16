@@ -58,4 +58,10 @@ public class EntityFrameworkCredentialsRepository : ICredentialRepository
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Username == username);
     }
+    public async Task<IEnumerable<Credential>> GetUsersWithAuthorFlagAsync()
+    {
+        return await dbContext.Credentials
+            .Where(c => c.IsAuthor)
+            .ToListAsync();
+    }
 }

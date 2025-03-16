@@ -72,6 +72,12 @@ public static class CredentialsEndpoints
         })
         .RequireAuthorization(Policies.AdminAccess);
 
+        credentialGroup.MapGet("/withAuthorFlag", async (ICredentialRepository repository) =>
+        {
+            var authors = await repository.GetUsersWithAuthorFlagAsync();
+            return Results.Ok(authors.Select(a => new { a.Id, a.Username, a.ClientId }));
+        });
+
         return credentialGroup;
     }
 }

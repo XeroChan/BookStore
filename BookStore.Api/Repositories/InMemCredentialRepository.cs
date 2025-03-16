@@ -65,4 +65,8 @@ public class InMemCredentialRepository : ICredentialRepository
     {
         return await Task.FromResult(credentials.FirstOrDefault(c => c.Username == username));
     }
+    public async Task<IEnumerable<Credential>> GetUsersWithAuthorFlagAsync()
+    {
+        return await Task.FromResult(credentials.Where(c => c.IsAuthor));
+    }
 }
