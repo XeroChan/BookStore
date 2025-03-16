@@ -1,5 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { styled } from '@mui/system';
+
+const StyledInput = styled('input')({
+  '::placeholder': {
+    color: '#dbdbdb', // Change this to your desired placeholder color#dbdbdb
+  },
+});
 
 const DeleteAccount = ({ clientId, setIsAuthenticated, IsAuthenticated }) => {
   const [password, setPassword] = useState("");
@@ -32,7 +39,7 @@ const DeleteAccount = ({ clientId, setIsAuthenticated, IsAuthenticated }) => {
 
   return (
     <div>
-      <input
+      <StyledInput
         type="password"
         placeholder="Potwierdź hasło"
         value={password}
