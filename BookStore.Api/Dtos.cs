@@ -220,3 +220,8 @@ public record UpdateCommentDto
     [Required][StringLength(250)] string CommentString,
     [Required] int Rating
 );
+
+public record CreateAuthorsDto
+{
+    public List<int> UserIds { get; set; }
+}
