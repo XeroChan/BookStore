@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Checkbox, FormControlLabel, FormGroup, Paper, Typography } from '@mui/material';
+import { Box, Button, Checkbox, FormControlLabel, FormGroup, Paper, Typography, Alert } from '@mui/material';
 import * as api from '../api/data';
 
-const AuthorForm = ({ setShowAuthorForm }) => {
+const AuthorForm = ({ setShowAuthorForm, setError }) => {
   const [users, setUsers] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
+  const [error, setErrorState] = useState("");
 
   useEffect(() => {
     const fetchUsersAndAuthors = async () => {
@@ -26,36 +27,50 @@ const AuthorForm = ({ setShowAuthorForm }) => {
   };
 
   const handleSave = async () => {
+    if (selectedUsers.length === 0) {
+      setErrorState("Lista autorów nie może być pusta.");
+      return;
+    }
     await api.addAuthors(selectedUsers);
     setShowAuthorForm(false);
+    setError("");
   };
 
   return (
-    <Paper style={{ padding: '1rem', maxHeight: '400px', overflowY: 'auto' }}>
-      <Typography variant="h6">Dodaj autora</Typography>
-      <FormGroup>
-        {users.map((user) => (
-          <FormControlLabel
-            key={user.id}
-            control={
-              <Checkbox
-                checked={selectedUsers.includes(user.id)}
-                onChange={() => handleCheckboxChange(user.id)}
-              />
-            }
-            label={`${user.username}`}
-          />
-        ))}
-      </FormGroup>
-      <Box mt={2}>
-        <Button variant="contained" color="primary" onClick={handleSave}>
-          Zapisz
-        </Button>
-        <Button variant="contained" color="secondary" onClick={() => setShowAuthorForm(false)} style={{ marginLeft: '1rem' }}>
-          Anuluj
-        </Button>
-      </Box>
-    </Paper>
+    <Box p={2}>
+      <Paper style={{ padding: '1rem', maxHeight: '400px', overflowY: 'auto' }}>
+        <Typography variant="h6">Dodaj autora</Typography>
+        <FormGroup>
+          {users.map((user) => (
+            <FormControlLabel
+              key={user.id}
+              control={
+                <Checkbox
+                  checked={selectedUsers.includes(user.id)}
+                  onChange={() => handleCheckboxChange(user.id)}
+                />
+              }
+              label={`${user.username}`}
+            />
+          ))}
+        </FormGroup>
+        <Box mt={2}>
+          <Button variant="contained" color="primary" onClick={handleSave}>
+            Zapisz
+          </Button>
+          <Button variant="contained" color="primary" onClick={() => setShowAuthorForm(false)} style={{ marginLeft: '1rem' }}>
+            Anuluj
+          </Button>
+        </Box>
+      </Paper>
+      {error && (
+        <Box mt={2}>
+          <Alert severity="error" style={{ padding: '1rem' }}>
+            {error}
+          </Alert>
+        </Box>
+      )}
+    </Box>
   );
 };
 

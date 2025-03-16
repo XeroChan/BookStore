@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Paper, Button, Stack, Pagination, TextField } from '@mui/material';
+import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Paper, Button, Stack, Pagination, TextField, Alert } from '@mui/material';
 import { getSubscriptionId, handleOpenDialog, handleSubscribeToAuthor } from '../helpers/storePageHelpers';
 import AuthorForm from './AuthorForm';
 
@@ -7,6 +7,7 @@ const AuthorsTable = ({ user, isAdmin, authors, subscriptions, setNewPublication
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [showAuthorForm, setShowAuthorForm] = useState(false);
+  const [error, setError] = useState("");
   const authorsPerPage = 5;
 
   const handlePageChange = (_event, newPage) => {
@@ -47,7 +48,8 @@ const AuthorsTable = ({ user, isAdmin, authors, subscriptions, setNewPublication
       <Button variant="contained" color="primary" onClick={() => setShowAuthorForm(true)}>
         Dodaj autora
       </Button>
-      {showAuthorForm && <AuthorForm setShowAuthorForm={setShowAuthorForm} />}
+      {showAuthorForm && <AuthorForm setShowAuthorForm={setShowAuthorForm} setError={setError} />}
+      {error && <Alert severity="error">{error}</Alert>}
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
