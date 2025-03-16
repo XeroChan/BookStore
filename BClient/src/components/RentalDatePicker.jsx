@@ -11,7 +11,10 @@ const RentalDatePicker = ({ dueDate, handleDueDateChange, handleBookRental, hand
             onChange={handleDueDateChange}
             InputLabelProps={{
                 shrink: true,
-            }}
+                sx: {
+                  color: "#9bc9db",
+                },
+              }}
             style={{ marginRight: "10px" }}
         />
         <Button
