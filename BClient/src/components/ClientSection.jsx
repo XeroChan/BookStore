@@ -44,8 +44,6 @@ const ClientSection = ({
 
   return (
     <div>
-      <h2>Katalog</h2>
-
       <RentalSnackbar
         rentalSuccess={rentalSuccess}
         handleSnackbarClose={handleSnackbarClose}
