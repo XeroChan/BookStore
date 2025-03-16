@@ -36,7 +36,6 @@ const ClientSection = ({
   };
 
   useEffect(() => {
-    // Fetch rentals data when rentalSuccess changes
     if (rentalSuccess) {
       fetchRentals(setRentals);
     }

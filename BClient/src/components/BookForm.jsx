@@ -58,7 +58,6 @@ const BookForm = ({
 
     const handleSelectChange = (e) => {
         const AuthorId = parseInt(e.target.value, 10);
-        console.log("Selected Author ID:", AuthorId); // Debugging log
         setBookDetails((prevState) => ({
             ...prevState,
             AuthorId: AuthorId,
@@ -95,7 +94,6 @@ const BookForm = ({
     };
 
     const handleSubmit = () => {
-        console.log("Submitting Book Details:", bookDetails); // Debugging log
         if (bookDetails.isbn.length !== 13) {
             setIsbnError(true);
             return;

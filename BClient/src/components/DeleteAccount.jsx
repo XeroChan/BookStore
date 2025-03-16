@@ -5,7 +5,7 @@ import { Alert, Button, TextField } from '@mui/material';
 
 const StyledInput = styled('input')({
   '::placeholder': {
-    color: '#dbdbdb', // Change this to your desired placeholder color
+    color: '#dbdbdb',
   },
 });
 
