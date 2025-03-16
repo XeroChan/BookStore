@@ -29,6 +29,9 @@ const SearchBar = ({ setSearchQuery }) => {
               <SearchIcon style={{ fill: "dodgerblue" }} />
             </IconButton>
           ),
+          sx: {
+            color: "#9bc9db",
+          }
         }}
         style={{ marginBottom: "20px" }}
       />
