@@ -15,10 +15,10 @@ export const HomePage = () => {
   return (
     <CenteredContainer>
       <Typography variant="h4" gutterBottom>
-        Welcome to BookStore
+        Witamy w księgarni
       </Typography>
       <Typography variant="body1" gutterBottom>
-        Please login or register to continue.
+        Zarejestruj się albo zaloguj, aby kontynuować.
       </Typography>
     </CenteredContainer>
   );
