@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { fetchUserComments, fetchBookDetails, deleteComment, updateClientDescription, fetchClientDescription, fetchCredentialByClientId } from '../api/data';
-import { Button, Container, TextField, Typography, Grid, IconButton, Card, CardContent, CardActions, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Pagination } from '@mui/material';
+import { Button, Box, Container, TextField, Typography, Grid, IconButton, Card, CardContent, CardActions, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Pagination } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { styled } from '@mui/system';
@@ -158,6 +158,11 @@ export const UserProfile = ({ user, setIsAuthenticated }) => {
                 onChange={handleDescriptionChange}
                 fullWidth
                 margin="normal"
+                InputLabelProps={{
+                  sx: {
+                    color: "#9bc9db",
+                  },
+                }}
               />
               <Button variant="contained" color="primary" onClick={handleSave}>
                 Zapisz
@@ -173,7 +178,10 @@ export const UserProfile = ({ user, setIsAuthenticated }) => {
               </Button>
             </>
           )}
-          {!isAdmin && <DeleteAccount clientId={user.clientId} setIsAuthenticated={setIsAuthenticated} />} {/* Show DeleteAccount component if user is not an admin */}
+          <Box sx={{ padding: '16px' }}>
+            {!isAdmin && <DeleteAccount clientId={user.clientId} setIsAuthenticated={setIsAuthenticated} />}
+          </Box>
+          
         </>
       )}
 
