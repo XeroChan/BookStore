@@ -1,7 +1,18 @@
 import React from "react";
-import { FormControl, InputLabel, Select, MenuItem, TextField } from "@mui/material";
+import {
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TextField,
+} from "@mui/material";
 
-const BookFilter = ({ filterCriteria, setFilterCriteria, searchQuery, setSearchQuery }) => {
+const BookFilter = ({
+  filterCriteria,
+  setFilterCriteria,
+  searchQuery,
+  setSearchQuery,
+}) => {
   const handleFilterChange = (event) => {
     setFilterCriteria(event.target.value);
   };
@@ -13,13 +24,22 @@ const BookFilter = ({ filterCriteria, setFilterCriteria, searchQuery, setSearchQ
   return (
     <div>
       <FormControl variant="outlined" fullWidth>
-        <InputLabel id="filter-label">Filtruj po</InputLabel>
+        <InputLabel id="filter-label" sx={{ color: "#9bc9db" }}>Filtruj po</InputLabel>
         <Select
           labelId="filter-label"
           id="filter"
           value={filterCriteria}
           onChange={handleFilterChange}
           label="Filter by"
+          sx={{
+            color: "#9bc9db",
+            ".MuiSelect-icon": {
+              color: "#9bc9db",
+            },
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#9bc9db",
+            },
+          }}
         >
           <MenuItem value="title">Tytuł</MenuItem>
           <MenuItem value="author">Autor</MenuItem>
@@ -28,12 +48,25 @@ const BookFilter = ({ filterCriteria, setFilterCriteria, searchQuery, setSearchQ
         </Select>
       </FormControl>
       <TextField
-        label="Search"
+        label="Wyszukaj"
         variant="outlined"
         fullWidth
         margin="normal"
         value={searchQuery}
         onChange={handleSearchChange}
+        InputLabelProps={{
+          sx: {
+            color: "#9bc9db",
+          },
+        }}
+        InputProps={{
+          sx: {
+            color: "#ffffff",
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#9bc9db",
+            },
+          },
+        }}
       />
     </div>
   );
