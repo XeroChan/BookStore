@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Stack, Pagination } from "@mui/material";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Paper, Button, Stack, Pagination } from "@mui/material";
 import BookForm from "../components/BookForm";
 import { handleEditBook as editBookHelper, handleAddBook as addBookHelper } from "../helpers/storePageHelpers";
 
@@ -22,6 +22,8 @@ const AdminSection = ({
   const [filteredBooks, setFilteredBooks] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [isEditing, setIsEditing] = useState(false);
+  const [rentalSearchQuery, setRentalSearchQuery] = useState("");
+  const [filteredRentals, setFilteredRentals] = useState([]);
   const BooksPerPage = 5;
   const RentalsPerPage = 5;
 
@@ -32,15 +34,29 @@ const AdminSection = ({
     setFilteredBooks(filtered);
   }, [books, searchQuery]);
 
+  useEffect(() => {
+    const filtered = rentals.filter((rental) => {
+      const client = clients.find((client) => client.id === rental.clientId);
+      const clientName = `${client?.name?.toLowerCase() || ""} ${client?.surname?.toLowerCase() || ""}`;
+      return clientName.includes(rentalSearchQuery.toLowerCase());
+    });
+    setFilteredRentals(filtered);
+  }, [rentals, rentalSearchQuery, clients]);
+
   const startIndex = (currentPage - 1) * BooksPerPage;
   const endIndex = startIndex + BooksPerPage;
   const booksToShow = filteredBooks.slice(startIndex, endIndex);
+
+  const startRentalIndex = (currentPage - 1) * RentalsPerPage;
+  const endRentalIndex = startRentalIndex + RentalsPerPage;
+  const rentalsToShow = filteredRentals.slice(startRentalIndex, endRentalIndex);
 
   const handlePageChange = (_event, newPage) => {
     setCurrentPage(newPage);
   };
 
   const handleEditBookClickInternal = (book) => {
+    console.log("Editing Book Details:", book);
     setBookDetails(book);
     setShowAddBookForm(true);
     setIsEditing(true);
@@ -71,7 +87,7 @@ const AdminSection = ({
     } else {
         addBookHelper(bookDetails, setBooks, setShowAddBookForm, setBookDetails);
     }
-};
+  };
   
   const handleCancel = () => {
     setShowAddBookForm(false);
@@ -92,17 +108,28 @@ const AdminSection = ({
     });
   };
 
-  const startRentalIndex = (currentPage - 1) * RentalsPerPage;
-  const endRentalIndex = startRentalIndex + RentalsPerPage;
-  const rentalsToShow = rentals.slice(startRentalIndex, endRentalIndex);
-
   return (
     <div>
-      <input
-        type="text"
-        placeholder="Search books..."
+      <TextField
+        label="Wyszukaj"
+        variant="outlined"
+        fullWidth
+        margin="normal"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
+        InputLabelProps={{
+          sx: {
+            color: "#9bc9db",
+          },
+        }}
+        InputProps={{
+          sx: {
+            color: "#ffffff",
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#89c7fa",
+            },
+          },
+        }}
       />
       <TableContainer component={Paper}>
         <Table>
@@ -182,6 +209,27 @@ const AdminSection = ({
         />
       )}
       <h2>Wypożyczenia klientów</h2>
+      <TextField
+        label="Wyszukaj klienta"
+        variant="outlined"
+        fullWidth
+        margin="normal"
+        value={rentalSearchQuery}
+        onChange={(e) => setRentalSearchQuery(e.target.value)}
+        InputLabelProps={{
+          sx: {
+            color: "#9bc9db",
+          },
+        }}
+        InputProps={{
+          sx: {
+            color: "#ffffff",
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#89c7fa",
+            },
+          },
+        }}
+      />
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -206,7 +254,7 @@ const AdminSection = ({
       </TableContainer>
       <Stack spacing={2} style={{ marginTop: "5vh", textAlign: "center" }}>
         <Pagination
-          count={Math.ceil(rentals.length / RentalsPerPage)}
+          count={Math.ceil(filteredRentals.length / RentalsPerPage)}
           page={currentPage}
           onChange={handlePageChange}
           variant="outlined"
