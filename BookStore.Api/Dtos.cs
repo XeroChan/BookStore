@@ -136,8 +136,7 @@ public record UserRegistrationDto
     [Required][StringLength(100)][EmailAddress] string Email,
     [Required][StringLength(9)][Phone] string Telephone,
     [Required][StringLength(20)] string Username,
-    [Required][StringLength(20)] string Password,
-    bool IsAdmin
+    [Required][StringLength(20)] string Password
 );
 
 public record LoginDto
