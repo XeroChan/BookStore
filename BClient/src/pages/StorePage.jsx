@@ -23,7 +23,7 @@ import BookCatalog from "../components/BookCatalog";
 import RentalDatePicker from "../components/RentalDatePicker";
 import AuthorsTable from "../components/AuthorsTable";
 import ConfirmationDialog from "../components/ConfirmationDialog";
-import CommentsSection from "../components/CommentsSection";
+import CommentsSection from '../components/CommentsSection';
 import BookDetailsDialog from "../components/BookDetailsDialog";
 
 export const StorePage = ({ user, setUser }) => {
@@ -137,7 +137,7 @@ export const StorePage = ({ user, setUser }) => {
     <Container>
       {user && (
         <div style={{ marginLeft: "auto", fontSize: "1.5rem" }}>
-          <p>Witaj, {user.sub}!</p>
+          <p>Witaj {user.sub}!</p>
         </div>
       )}
 
@@ -217,6 +217,7 @@ export const StorePage = ({ user, setUser }) => {
           setSelectedSubscription={setSelectedSubscription}
           setOpenDialog={setOpenDialog}
           credentialId={credentialId}
+          setAuthors={setAuthors}
         />
         <ConfirmationDialog
           open={openDialog}
