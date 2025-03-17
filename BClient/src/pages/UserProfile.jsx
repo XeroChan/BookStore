@@ -181,6 +181,14 @@ export const UserProfile = ({ user, setIsAuthenticated }) => {
                     color: "#9bc9db",
                   },
                 }}
+                InputProps={{
+                  sx: {
+                    color: "#ffffff",
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#89c7fa",
+                    },
+                  },
+                }}
               />
               <Button variant="contained" color="primary" onClick={handleSave}>
                 Zapisz
