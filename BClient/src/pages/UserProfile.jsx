@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import { fetchUserComments, fetchBookDetails, deleteComment, updateClientDescription, fetchClientDescription, fetchCredentialByClientId } from '../api/data';
+import { fetchUserComments, fetchBookDetails, deleteComment, updateClientDescription, fetchClientDescription, fetchCredentialByClientId, verifyAuthor } from '../api/data';
 import { Button, Box, Container, TextField, Typography, Grid, IconButton, Card, CardContent, CardActions, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Pagination } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -40,6 +40,7 @@ export const UserProfile = ({ user, setIsAuthenticated }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [commentsPerPage] = useState(9);
   const [selectedComment, setSelectedComment] = useState(null);
+  const [isAuthor, setIsAuthor] = useState(user?.isAuthor || 0);
 
   const isOwnProfile = !clientId || clientId === user?.clientId.toString();
   const isAdmin = user?.role === "Admin";
@@ -56,6 +57,7 @@ export const UserProfile = ({ user, setIsAuthenticated }) => {
           const cred = await fetchCredentialByClientId(id);
           const username = cred?.username;
           setUsername(username || "Brak nazwy użytkownika");
+          setIsAuthor(cred?.isAuthor || 0);
 
           const comments = await fetchUserComments(id);
           setComments(comments);
@@ -131,6 +133,17 @@ export const UserProfile = ({ user, setIsAuthenticated }) => {
     setSelectedComment(null);
   };
 
+  const handleVerifyAuthor = async () => {
+    try {
+      await verifyAuthor(user.clientId);
+      alert("User verified as author successfully.");
+      setIsAuthor(1);
+    } catch (error) {
+      console.error("Error verifying author:", error);
+      alert("Failed to verify user as author.");
+    }
+  };
+
   const indexOfLastComment = currentPage * commentsPerPage;
   const indexOfFirstComment = indexOfLastComment - commentsPerPage;
   const currentComments = comments.slice(indexOfFirstComment, indexOfLastComment);
@@ -141,12 +154,17 @@ export const UserProfile = ({ user, setIsAuthenticated }) => {
 
   return (
     <CenteredContainer>
-      <Typography variant="h4" gutterBottom>
-        Profil użytkownika {username}
-      </Typography>
-      {isOwnProfile && (
+      {isOwnProfile ? (
         <>
           <Typography variant="h6">Witaj, {user.sub}!</Typography>
+        </>
+      ) : (
+        <Typography variant="h4" gutterBottom>
+          Profil użytkownika {username}
+        </Typography>
+      )}
+      {isOwnProfile && (
+        <>
           {isEditingDescription ? (
             <>
               <TextField
@@ -181,7 +199,11 @@ export const UserProfile = ({ user, setIsAuthenticated }) => {
           <Box sx={{ padding: '16px' }}>
             {!isAdmin && <DeleteAccount clientId={user.clientId} setIsAuthenticated={setIsAuthenticated} />}
           </Box>
-          
+          {isAuthor !== 1 && (
+            <Button variant="contained" color="secondary" onClick={handleVerifyAuthor}>
+              Weryfikuj autora
+            </Button>
+          )}
         </>
       )}
 
