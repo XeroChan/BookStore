@@ -67,7 +67,8 @@ const CommentsSection = ({
   const validateForm = () => {
     const newErrors = {};
     if (!newComment) newErrors.newComment = "Komentarz jest wymagany";
-    if (newRating < 0 || newRating > 5) newErrors.newRating = "Ocena musi być między 0 a 5";
+    if (newRating < 0 || newRating > 5)
+      newErrors.newRating = "Ocena musi być między 0 a 5";
     if (!selectedBookId) newErrors.selectedBookId = "Wybierz książkę";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -101,7 +102,11 @@ const CommentsSection = ({
 
   const handleUpdateComment = async () => {
     if (editingComment) {
-      await api.updateComment(editingComment.id, editedCommentText, editedCommentRating);
+      await api.updateComment(
+        editingComment.id,
+        editedCommentText,
+        editedCommentRating
+      );
       setEditingComment(null);
       fetchData();
     }
@@ -137,19 +142,23 @@ const CommentsSection = ({
                 },
               }}
             />
-            {errors.newComment && <FormHelperText>{errors.newComment}</FormHelperText>}
+            {errors.newComment && (
+              <FormHelperText>{errors.newComment}</FormHelperText>
+            )}
           </FormControl>
           <FormControl fullWidth error={!!errors.newRating}>
             <TextField
-            InputProps={{
-              sx: {
-                color: "#ffffff",
-              },
-            }}
+              InputProps={{
+                sx: {
+                  color: "#ffffff",
+                },
+              }}
               label="Ocena"
               type="number"
               value={newRating}
-              onChange={(e) => setNewRating(Math.min(Math.max(Number(e.target.value), 0), 5))}
+              onChange={(e) =>
+                setNewRating(Math.min(Math.max(Number(e.target.value), 0), 5))
+              }
               inputProps={{ min: 0, max: 5 }}
               fullWidth
               required
@@ -172,14 +181,18 @@ const CommentsSection = ({
                 },
               }}
             />
-            {errors.newRating && <FormHelperText>{errors.newRating}</FormHelperText>}
+            {errors.newRating && (
+              <FormHelperText>{errors.newRating}</FormHelperText>
+            )}
           </FormControl>
           <FormControl fullWidth error={!!errors.selectedBookId}>
             <Autocomplete
               options={books.sort((a, b) => a.title.localeCompare(b.title))}
               getOptionLabel={(option) => option.title}
               value={books.find((book) => book.id === selectedBookId) || null}
-              onChange={(_event, newValue) => setSelectedBookId(newValue ? newValue.id : "")}
+              onChange={(_event, newValue) =>
+                setSelectedBookId(newValue ? newValue.id : "")
+              }
               renderInput={(params) => (
                 <TextField
                   {...params}
@@ -201,10 +214,16 @@ const CommentsSection = ({
                 />
               )}
             />
-            {errors.selectedBookId && <FormHelperText>{errors.selectedBookId}</FormHelperText>}
+            {errors.selectedBookId && (
+              <FormHelperText>{errors.selectedBookId}</FormHelperText>
+            )}
           </FormControl>
           <Box p={2}>
-            <Button variant="contained" color="primary" onClick={handlePostComment}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handlePostComment}
+            >
               Dodaj Komentarz
             </Button>
           </Box>
@@ -226,59 +245,75 @@ const CommentsSection = ({
           <p>Ocena: {comment.rating}</p>
           {isAdmin && (
             <div>
-              <IconButton onClick={() => handleEditComment(comment)}>
+              <IconButton
+                onClick={() => handleEditComment(comment)}
+                sx={{ color: "#89c7fa" }}
+              >
                 <EditIcon />
               </IconButton>
-              <IconButton onClick={() => handleDeleteComment(comment.id)}>
+              <IconButton
+                onClick={() => handleDeleteComment(comment.id)}
+                sx={{ color: "#89c7fa" }}
+              >
                 <DeleteIcon />
               </IconButton>
             </div>
           )}
+          {editingComment?.id === comment.id && (
+            <div>
+              <h3>Edytuj</h3>
+              <TextField
+                label="Komentarz"
+                value={editedCommentText}
+                onChange={(e) => setEditedCommentText(e.target.value)}
+                fullWidth
+                InputLabelProps={{
+                  sx: {
+                    color: "#9bc9db",
+                  },
+                }}
+                InputProps={{
+                  sx: {
+                    color: "#ffffff",
+                  },
+                }}
+              />
+              <TextField
+                label="Ocena"
+                type="number"
+                value={editedCommentRating}
+                onChange={(e) => setEditedCommentRating(Number(e.target.value))}
+                inputProps={{ min: 0, max: 5 }}
+                fullWidth
+                InputLabelProps={{
+                  sx: {
+                    color: "#9bc9db",
+                  },
+                }}
+                InputProps={{
+                  sx: {
+                    color: "#ffffff",
+                  },
+                }}
+              />
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleUpdateComment}
+              >
+                Zapisz
+              </Button>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={() => setEditingComment(null)}
+              >
+                Anuluj
+              </Button>
+            </div>
+          )}
         </div>
       ))}
-      {editingComment && (
-        <div>
-          <h3>Edytuj</h3>
-          <TextField
-            label="Komentarz"
-            value={editedCommentText}
-            onChange={(e) => setEditedCommentText(e.target.value)}
-            fullWidth
-            InputLabelProps={{
-              sx: {
-                color: "#9bc9db",
-              },
-            }}
-          />
-          <TextField
-            label="Ocena"
-            type="number"
-            value={editedCommentRating}
-            onChange={(e) => setEditedCommentRating(Number(e.target.value))}
-            inputProps={{ min: 0, max: 5 }}
-            fullWidth
-            InputLabelProps={{
-              sx: {
-                color: "#9bc9db",
-              },
-            }}
-          />
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleUpdateComment}
-          >
-            Zapisz
-          </Button>
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={() => setEditingComment(null)}
-          >
-            Anuluj
-          </Button>
-        </div>
-      )}
 
       <Stack spacing={2} style={{ marginTop: "2vh", textAlign: "center" }}>
         <Pagination
