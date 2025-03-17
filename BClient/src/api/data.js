@@ -567,3 +567,25 @@ export const addAuthors = async (userIds) => {
     console.error("Error adding authors:", error);
   }
 };
+
+export const verifyAuthor = async (clientId) => {
+  try {
+    const token = sessionStorage.getItem("authToken");
+    if (!token) {
+      throw new Error("No auth token found");
+    }
+    const response = await fetch(`http://localhost:5088/clients/${clientId}/verify-author`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token.replace(/"/g, "")}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to verify author: ${response.statusText}`);
+    }
+  } catch (error) {
+    console.error("Error verifying author:", error);
+    throw error;
+  }
+};
