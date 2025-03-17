@@ -155,6 +155,20 @@ public static class ClientsEndpoints
             return Results.NoContent();
         });
 
+        clientGroup.MapPost("/{id}/verify-author", async (int id, ICredentialRepository credentialRepository) =>
+        {
+            Credential? credential = await credentialRepository.GetByClientIdAsync(id);
+            if (credential == null)
+            {
+                return Results.NotFound(new { message = "Nie znaleziono profilu." });
+            }
+
+            credential.IsAuthor = true;
+            await credentialRepository.UpdateAsync(credential);
+
+            return Results.Ok(new { message = "Wysłano prośbę o weryfikacje." });
+        });
+
         return clientGroup;
     }
 }
