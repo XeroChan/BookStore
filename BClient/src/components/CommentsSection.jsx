@@ -296,7 +296,7 @@ const CommentsSection = ({
                   },
                 }}
               />
-              <Stack direction="row" spacing={2} mt={2}>
+              <Stack direction="row" spacing={2} mt={2} alignItems={"center"} justifyContent={"center"}>
                 <Button
                   variant="contained"
                   color="primary"
