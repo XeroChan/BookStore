@@ -1,15 +1,15 @@
 import React, { useEffect, useState, useRef } from "react";
 import {
+  Box,
   TextField,
   Button,
   IconButton,
   Stack,
   Pagination,
   Autocomplete,
-  Paper,
-  Popper,
   FormControl,
   FormHelperText,
+  Typography,
 } from "@mui/material";
 import * as api from "../api/data";
 import { Link } from "react-router-dom";
@@ -107,14 +107,6 @@ const CommentsSection = ({
     }
   };
 
-  const CustomPopper = (props) => {
-    return <Popper {...props} placement="bottom-start" />;
-  };
-
-  const CustomPaper = (props) => {
-    return <Paper {...props} style={{ maxHeight: 200, overflow: 'auto' }} />;
-  };
-
   return (
     <div>
       {!isAdmin && (
@@ -132,11 +124,28 @@ const CommentsSection = ({
                   color: "#9bc9db",
                 },
               }}
+              sx={{
+                "&:hover .MuiOutlinedInput-root": {
+                  "& fieldset": {
+                    borderColor: "#9bc9db",
+                  },
+                },
+              }}
+              InputProps={{
+                sx: {
+                  color: "#ffffff",
+                },
+              }}
             />
             {errors.newComment && <FormHelperText>{errors.newComment}</FormHelperText>}
           </FormControl>
           <FormControl fullWidth error={!!errors.newRating}>
             <TextField
+            InputProps={{
+              sx: {
+                color: "#ffffff",
+              },
+            }}
               label="Ocena"
               type="number"
               value={newRating}
@@ -149,6 +158,19 @@ const CommentsSection = ({
                   color: "#9bc9db",
                 },
               }}
+              sx={{
+                "& .MuiInputBase-root": {
+                  color: "#9bc9db",
+                },
+                "&:hover .MuiOutlinedInput-root": {
+                  "& fieldset": {
+                    borderColor: "#9bc9db",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#89c7fa",
+                  },
+                },
+              }}
             />
             {errors.newRating && <FormHelperText>{errors.newRating}</FormHelperText>}
           </FormControl>
@@ -158,8 +180,6 @@ const CommentsSection = ({
               getOptionLabel={(option) => option.title}
               value={books.find((book) => book.id === selectedBookId) || null}
               onChange={(_event, newValue) => setSelectedBookId(newValue ? newValue.id : "")}
-              PopperComponent={CustomPopper}
-              PaperComponent={CustomPaper}
               renderInput={(params) => (
                 <TextField
                   {...params}
@@ -171,14 +191,23 @@ const CommentsSection = ({
                       color: "#9bc9db",
                     },
                   }}
+                  sx={{
+                    "&:hover .MuiOutlinedInput-root": {
+                      "& fieldset": {
+                        borderColor: "#9bc9db",
+                      },
+                    },
+                  }}
                 />
               )}
             />
             {errors.selectedBookId && <FormHelperText>{errors.selectedBookId}</FormHelperText>}
           </FormControl>
-          <Button variant="contained" color="primary" onClick={handlePostComment}>
-            Dodaj Komentarz
-          </Button>
+          <Box p={2}>
+            <Button variant="contained" color="primary" onClick={handlePostComment}>
+              Dodaj Komentarz
+            </Button>
+          </Box>
         </>
       )}
 
