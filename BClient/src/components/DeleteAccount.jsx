@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { styled } from '@mui/system';
-import { Alert, Button, TextField } from '@mui/material';
+import { Alert, Box, Button, TextField } from '@mui/material';
 
 const StyledInput = styled('input')({
   '::placeholder': {
@@ -74,9 +74,11 @@ const DeleteAccount = ({ clientId, setIsAuthenticated }) => {
         Usuń konto
       </Button>
       {errorMessage && (
-        <Alert severity="error" onClose={handleAlertClose} sx={{ marginTop: '1rem' }}>
-          {errorMessage}
-        </Alert>
+        <Box mt={2}>
+          <Alert severity="error" onClose={handleAlertClose} style={{ padding: '1rem' }}>
+            {errorMessage}
+          </Alert>
+        </Box>
       )}
     </div>
   );

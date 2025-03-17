@@ -1,6 +1,6 @@
-import { Container, Typography, TextField, Button, Alert } from "@mui/material";
+import { Box, Container, Typography, TextField, Button, Alert } from "@mui/material";
 import { styled } from "@mui/system";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import IconButton from '@mui/material/IconButton';
@@ -133,9 +133,11 @@ export const LoginPage = ({ setIsAuthenticated }) => {
         </Button>
       </LoginForm>
       {errorMessage && (
-        <Alert severity="error" onClose={handleAlertClose}>
-          {errorMessage}
-        </Alert>
+        <Box mt={2}>
+          <Alert severity="error" style={{ padding: '1rem' }} onClose={handleAlertClose}>
+            {errorMessage}
+          </Alert>
+        </Box>
       )}
     </LoginContainer>
   );

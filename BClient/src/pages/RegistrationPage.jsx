@@ -321,12 +321,13 @@ export const RegistrationPage = () => {
         message="Pomyślnie zarejestrowano. Zaloguj się."
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       />
-      <br></br>
+      <Box mt={2}>
       {errorMessage && (
-        <Alert severity="error" onClose={handleAlertClose}>
+        <Alert severity="error" onClose={handleAlertClose} style={{ padding: '1rem' }}>
           {errorMessage}
         </Alert>
       )}
+      </Box>
     </RegistrationContainer>
   );
 };

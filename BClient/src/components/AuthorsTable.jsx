@@ -53,7 +53,13 @@ const AuthorsTable = ({ user, isAdmin, authors, subscriptions, setNewPublication
         </Box>
       )}
       {showAuthorForm && <AuthorForm setShowAuthorForm={setShowAuthorForm} setError={setError} setAuthors={setAuthors}/>}
-      {error && <Alert severity="error">{error}</Alert>}
+      {error && (
+              <Box mt={2}>
+                <Alert severity="error" style={{ padding: '1rem' }}>
+                  {error}
+                </Alert>
+              </Box>
+            )}
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
