@@ -136,11 +136,11 @@ export const UserProfile = ({ user, setIsAuthenticated }) => {
   const handleVerifyAuthor = async () => {
     try {
       await verifyAuthor(user.clientId);
-      alert("User verified as author successfully.");
+      alert("Pomyślnie wysłano prośbę o weryfikację.");
       setIsAuthor(true);
     } catch (error) {
       console.error("Error verifying author:", error);
-      alert("Failed to verify user as author.");
+      alert("Nie udało się wysłać prośby o weryfikację.");
     }
   };
 
