@@ -126,7 +126,7 @@ const BookForm = ({
       <div>
         <form>
           <TextField
-            label="Title"
+            label="Tytuł"
             name="title"
             variant="outlined"
             fullWidth
@@ -180,7 +180,7 @@ const BookForm = ({
             renderInput={(params) => (
               <TextField
                 {...params}
-                label="Author"
+                label="Autor"
                 fullWidth
                 required
                 InputLabelProps={{
@@ -192,7 +192,7 @@ const BookForm = ({
             )}
           />
           <TextField
-            label="Publisher"
+            label="Wydawca"
             name="publisher"
             variant="outlined"
             fullWidth
@@ -227,7 +227,7 @@ const BookForm = ({
             }}
           />
           <TextField
-            label="Genre"
+            label="Gatunek"
             name="genre"
             variant="outlined"
             fullWidth
@@ -262,7 +262,7 @@ const BookForm = ({
             }}
           />
           <TextField
-            label="Description"
+            label="Opis"
             name="description"
             variant="outlined"
             fullWidth
@@ -341,7 +341,7 @@ const BookForm = ({
             }}
           />
           <TextField
-            label="Pages Count"
+            label="Ilość stron"
             name="pagesCount"
             variant="outlined"
             fullWidth
@@ -380,7 +380,7 @@ const BookForm = ({
             }}
           />
           <TextField
-            label="Price"
+            label="Cena"
             name="price"
             variant="outlined"
             fullWidth
@@ -418,7 +418,7 @@ const BookForm = ({
             }}
           />
           <TextField
-            label="Release Date"
+            label="Data wydania"
             name="releaseDate"
             variant="outlined"
             fullWidth
@@ -451,7 +451,7 @@ const BookForm = ({
             }}
           />
           <TextField
-            label="Image URI"
+            label="Adres URI obrazu"
             name="imageUri"
             variant="outlined"
             fullWidth
