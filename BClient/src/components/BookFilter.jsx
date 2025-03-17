@@ -39,6 +39,9 @@ const BookFilter = ({
             "&:hover .MuiOutlinedInput-notchedOutline": {
               borderColor: "#9bc9db",
             },
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#89c7fa",
+            },
           }}
         >
           <MenuItem value="title">Tytuł</MenuItem>
