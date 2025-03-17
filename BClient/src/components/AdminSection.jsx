@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Paper, Button, Stack, Pagination } from "@mui/material";
-import BookForm from "../components/BookForm";
+import BookForm from "./BookForm";
 import { handleEditBook as editBookHelper, handleAddBook as addBookHelper } from "../helpers/storePageHelpers";
 
 const AdminSection = ({
