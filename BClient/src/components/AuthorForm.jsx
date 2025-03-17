@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Button, Checkbox, FormControlLabel, FormGroup, Paper, Typography, Alert } from '@mui/material';
 import * as api from '../api/data';
 
-const AuthorForm = ({ setShowAuthorForm, setError }) => {
+const AuthorForm = ({ setShowAuthorForm, setError, setAuthors }) => {
   const [users, setUsers] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [error, setErrorState] = useState("");
@@ -34,6 +34,8 @@ const AuthorForm = ({ setShowAuthorForm, setError }) => {
     await api.addAuthors(selectedUsers);
     setShowAuthorForm(false);
     setError("");
+    const newAuthors = await api.fetchAuthors();
+    setAuthors(newAuthors);
   };
 
   return (
