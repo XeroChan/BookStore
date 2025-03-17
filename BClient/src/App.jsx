@@ -62,7 +62,7 @@ function App({ isAuthenticated, setIsAuthenticated, user, setUser }) {
                   },
                 }}
                 >
-                  Wypożyczalnia
+                  Księgarnia
                 </Button>
                 <Button color="inherit" component={Link} to="/userpage" state={{ user }}
                 sx={{
