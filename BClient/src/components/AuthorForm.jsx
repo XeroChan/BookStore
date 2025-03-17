@@ -28,7 +28,7 @@ const AuthorForm = ({ setShowAuthorForm, setError, setAuthors }) => {
 
   const handleSave = async () => {
     if (selectedUsers.length === 0) {
-      setErrorState("Lista autorów nie może być pusta.");
+      setErrorState("Lista zaakceptowanych autorów nie może być pusta.");
       return;
     }
     await api.addAuthors(selectedUsers);
