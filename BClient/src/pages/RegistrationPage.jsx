@@ -331,3 +331,5 @@ export const RegistrationPage = () => {
     </RegistrationContainer>
   );
 };
+
+export default RegistrationPage;
