@@ -40,7 +40,7 @@ export const UserProfile = ({ user, setIsAuthenticated }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [commentsPerPage] = useState(9);
   const [selectedComment, setSelectedComment] = useState(null);
-  const [isAuthor, setIsAuthor] = useState(user?.isAuthor || 0);
+  const [isAuthor, setIsAuthor] = useState(false);
 
   const isOwnProfile = !clientId || clientId === user?.clientId.toString();
   const isAdmin = user?.role === "Admin";
@@ -57,7 +57,7 @@ export const UserProfile = ({ user, setIsAuthenticated }) => {
           const cred = await fetchCredentialByClientId(id);
           const username = cred?.username;
           setUsername(username || "Brak nazwy użytkownika");
-          setIsAuthor(cred?.isAuthor || 0);
+          setIsAuthor(cred?.isAuthor || false);
 
           const comments = await fetchUserComments(id);
           setComments(comments);
@@ -137,7 +137,7 @@ export const UserProfile = ({ user, setIsAuthenticated }) => {
     try {
       await verifyAuthor(user.clientId);
       alert("User verified as author successfully.");
-      setIsAuthor(1);
+      setIsAuthor(true);
     } catch (error) {
       console.error("Error verifying author:", error);
       alert("Failed to verify user as author.");
@@ -207,7 +207,7 @@ export const UserProfile = ({ user, setIsAuthenticated }) => {
           <Box sx={{ padding: '16px' }}>
             {!isAdmin && <DeleteAccount clientId={user.clientId} setIsAuthenticated={setIsAuthenticated} />}
           </Box>
-          {isAuthor !== 1 && (
+          {!isAuthor && (
             <Button variant="contained" color="secondary" onClick={handleVerifyAuthor}>
               Weryfikuj autora
             </Button>
@@ -272,3 +272,5 @@ export const UserProfile = ({ user, setIsAuthenticated }) => {
     </CenteredContainer>
   );
 };
+
+export default UserProfile;
