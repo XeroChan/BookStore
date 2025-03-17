@@ -277,6 +277,13 @@ const CommentsSection = ({
                     color: "#ffffff",
                   },
                 }}
+                sx={{
+                  "&:hover .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "#9bc9db",
+                    },
+                  },
+                }}
               />
               <TextField
                 label="Ocena"
@@ -293,6 +300,13 @@ const CommentsSection = ({
                 InputProps={{
                   sx: {
                     color: "#ffffff",
+                  },
+                }}
+                sx={{
+                  "&:hover .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "#9bc9db",
+                    },
                   },
                 }}
               />
