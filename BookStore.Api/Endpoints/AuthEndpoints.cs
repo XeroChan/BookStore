@@ -22,7 +22,7 @@ public static class AuthEndpoints
 
             if (credential == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, credential.Password))
             {
-                return Results.BadRequest(new { Message = "Invalid username or password." });
+                return Results.BadRequest(new { Message = "Niepoprawne hasło lub nazwa użytkownika." });
             }
             else
             {
