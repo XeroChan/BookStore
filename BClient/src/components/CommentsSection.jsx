@@ -10,6 +10,7 @@ import {
   FormControl,
   FormHelperText,
   Typography,
+  Stack,
 } from "@mui/material";
 import * as api from "../api/data";
 import { Link } from "react-router-dom";
@@ -296,20 +297,22 @@ const CommentsSection = ({
                   },
                 }}
               />
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleUpdateComment}
-              >
-                Zapisz
-              </Button>
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={() => setEditingComment(null)}
-              >
-                Anuluj
-              </Button>
+              <Stack direction="row" spacing={2} mt={2}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleUpdateComment}
+                >
+                  Zapisz
+                </Button>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={() => setEditingComment(null)}
+                >
+                  Anuluj
+                </Button>
+              </Stack>
             </div>
           )}
         </div>
