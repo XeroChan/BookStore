@@ -460,3 +460,4 @@ F:\BookStore\BookStore.Api\obj\Debug\net7.0\BookStore.Api.pdb
 F:\BookStore\BookStore.Api\obj\Debug\net7.0\BookStore.Api.genruntimeconfig.cache
 F:\BookStore\BookStore.Api\obj\Debug\net7.0\ref\BookStore.Api.dll
 F:\BookStore\BookStore.Api\bin\Debug\net7.0\BCrypt.Net-Next.dll
+F:\BookStore\BookStore.Api\bin\Debug\net7.0\bookStoreDiag.vuerd.json
