@@ -10,5 +10,7 @@ public class CredentialConfiguration : IEntityTypeConfiguration<Credential>
     {
         builder.Property(credential => credential.IsAdmin)
                 .HasDefaultValue(false);
+        builder.Property(credential => credential.Password)
+            .HasMaxLength(20);
     }
 }
