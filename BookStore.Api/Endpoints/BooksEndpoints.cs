@@ -31,7 +31,7 @@ public static class BooksEndpoints //all extension methods are static
 
             return book is not null ? Results.Ok(book.AsDtoV1()) : Results.NotFound();
         })
-        .WithName(GetBookV1EndpointName) // retrive game by id
+        .WithName(GetBookV1EndpointName) // retrive book by id
         .MapToApiVersion(1.0);
 
         // V2 GET ENDPOINTS
@@ -46,7 +46,7 @@ public static class BooksEndpoints //all extension methods are static
 
             return book is not null ? Results.Ok(book.AsDtoV2()) : Results.NotFound();
         })
-        .WithName(GetBookV2EndpointName) // retrive game by id
+        .WithName(GetBookV2EndpointName) // retrive book by id
         .MapToApiVersion(2.0);
 
         group.MapPost("/", async (IBooksRepository repository, CreateBookDto bookDto) =>

@@ -69,10 +69,10 @@ public class InMemBooksRepository : IBooksRepository
 
         await Task.CompletedTask; // nothing to wait for after its complete
     }
-    public async Task UpdateAsync(Book updatedGame)
+    public async Task UpdateAsync(Book updatedBook)
     {
-        var index = books.FindIndex(book => book.Id == updatedGame.Id);
-        books[index] = updatedGame;
+        var index = books.FindIndex(book => book.Id == updatedBook.Id);
+        books[index] = updatedBook;
 
         await Task.CompletedTask;
     }

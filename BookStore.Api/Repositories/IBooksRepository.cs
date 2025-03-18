@@ -8,6 +8,6 @@ namespace BookStore.Api.Repositories
         Task DeleteAsync(int id);
         Task<Book?> GetAsync(int id);
         Task<IEnumerable<Book>> GetAllAsync();
-        Task UpdateAsync(Book updatedGame); // async approach with Task
+        Task UpdateAsync(Book updatedBook); // async approach with Task
     }
 }

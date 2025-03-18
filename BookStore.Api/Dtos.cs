@@ -223,5 +223,5 @@ public record UpdateCommentDto
 
 public record CreateAuthorsDto
 {
-    public List<int> UserIds { get; set; }
+    public required List<int> UserIds { get; set; }
 }
